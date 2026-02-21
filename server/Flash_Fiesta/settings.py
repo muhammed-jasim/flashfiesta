@@ -156,7 +156,8 @@ from datetime import timedelta
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'EXCEPTION_HANDLER': 'core.exceptions.handler.custom_exception_handler',
 }
 
 SIMPLE_JWT = {

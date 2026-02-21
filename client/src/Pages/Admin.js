@@ -34,13 +34,6 @@ const Admin = () => {
   }
 
   const AddProduct = async () => {
-    const token = localStorage.getItem("access_token");
-
-    if (!token) {
-      showNotification("You are not logged in. Please sign in first.", "error");
-      return;
-    }
-
     try {
       const response = await axios.post(CreteProduct, {
         ProductName: State.ProductName,
@@ -48,10 +41,6 @@ const Admin = () => {
         ProductImage: State.ProductImage,
         Qty: State.Qty,
         Rate: State.ProductPrice
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
       })
       if (response.data.Status === 6000) {
         showNotification("Product added successfully!", "success");

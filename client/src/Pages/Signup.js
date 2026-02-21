@@ -25,17 +25,23 @@ const Signup = () => {
     try {
       const response = await axios.post(RegisterApi, formData);
       if (response.data.Status === 6000) {
-        showNotification("Registration successful! Welcome.", "success");
+        // showNotification("Registration successful! Welcome.", "success");
         localStorage.setItem("username", response.data.username);
         localStorage.setItem("access_token", response.data.tokens.access);
         localStorage.setItem("refresh_token", response.data.tokens.refresh);
         navigate("/dashboard");
+      } else if (response.data.Status === 6001) {
+        showNotification(response.data.message, "warning");
       } else {
         showNotification("Registration failed: " + JSON.stringify(response.data.errors), "error");
       }
     } catch (error) {
-      console.error("Signup error:", error);
-      showNotification("An error occurred during signup.", "error");
+      const data = error.response?.data;
+      if (data?.Status === 6001) {
+        showNotification(data.message, "warning");
+      } else {
+        showNotification("An error occurred during signup.", "error");
+      }
     }
   };
 

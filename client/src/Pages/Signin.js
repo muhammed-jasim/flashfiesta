@@ -20,25 +20,26 @@ const Signin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const response = await axios.post(LoginApi, formData);
-      if (response.data.Status === 6000) {
-        // showNotification("Login successful!", "success");
-        // Clear any old session data
+      const { data } = await axios.post(LoginApi, formData);
+
+      if (data.Status === 6000) {
         localStorage.clear();
-        localStorage.setItem("username", response.data.username);
-        localStorage.setItem("access_token", response.data.tokens.access);
-        localStorage.setItem("refresh_token", response.data.tokens.refresh);
+        localStorage.setItem("username", data.username);
+        localStorage.setItem("access_token", data.tokens.access);
+        localStorage.setItem("refresh_token", data.tokens.refresh);
+
         navigate("/dashboard");
-      } else {
-        showNotification("Login failed: " + response.data.message, "error");
       }
-    } catch (error) {
-      console.error("Signin error:", error);
-      showNotification("Invalid credentials or server error.", "error");
+    } catch (err) {
+      const message =
+        err.response?.data?.message ||
+        "Invalid credentials or server error.";
+
+      showNotification(message, "error");
     }
   };
-
   return (
     <Box
       sx={{

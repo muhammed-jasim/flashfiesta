@@ -16,7 +16,7 @@ def get_tokens_for_user(user):
 @api_view(['POST'])
 def register_user(request):
     serializer = UserSerializer(data=request.data)
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         user = serializer.save()
         tokens = get_tokens_for_user(user)
         return Response({
