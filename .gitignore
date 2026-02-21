@@ -1,0 +1,58 @@
+# ===================================
+# OS / Editor
+# ===================================
+.DS_Store
+.idea/
+.vscode/
+.trunk/
+
+# ===================================
+# ENV / Secrets
+# ===================================
+.env
+.env.*
+*.pem
+*.key
+
+# ===================================
+# Node / React (client)
+# ===================================
+client/node_modules/
+client/.pnp
+client/.pnp.js
+client/coverage/
+client/build/
+client/.next/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===================================
+# Python / Django (server)
+# ===================================
+server/venv/
+server/__pycache__/
+server/**/*.pyc
+
+# Django migrations (keep init only)
+server/**/migrations/**
+!server/**/migrations
+!server/**/migrations/__init__.py
+
+# Media & DB
+server/media/
+server/db.sqlite3
+
+# Django static
+server/staticfiles/
+
+# ===================================
+# Logs
+# ===================================
+*.log
+
+# ===================================
+# Flash_Fiesta settings 
+# ===================================
+server/Flash_Fiesta/settings.py
