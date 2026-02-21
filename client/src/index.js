@@ -2,13 +2,22 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { NotificationProvider } from './NotificationContext';
+import { ThemeProvider } from 'styled-components';
+import { theme } from './theme';
+import { GlobalStyle } from './GlobalStyles';
+import { CartProvider } from './CartContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   // <React.StrictMode>
-  <NotificationProvider>
-    <App />
-  </NotificationProvider>
+  <ThemeProvider theme={theme}>
+    <GlobalStyle />
+    <NotificationProvider>
+      <CartProvider>
+        <App />
+      </CartProvider>
+    </NotificationProvider>
+  </ThemeProvider>
   // </React.StrictMode>
 );
 

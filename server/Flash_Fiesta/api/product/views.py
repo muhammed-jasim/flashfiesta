@@ -74,4 +74,17 @@ def Create_Product(request):
             response_data = {'Status': 6001, 'data': 'Provide valid data'}
         return Response(response_data,status=status.HTTP_200_OK)
 
+@api_view(["GET"])
+def ProductDetailView(request, pk):
+    try:
+        product = Product.objects.get(pk=pk)
+        serializer = ProductSerializer(product)
+        response_data = {'Status': 6000, 'data': serializer.data}
+    except Product.DoesNotExist:
+        response_data = {'Status': 6001, 'message': 'Product not found'}
+    except Exception as e:
+        response_data = {'Status': 6001, 'message': str(e)}
+
+    return Response(response_data, status=status.HTTP_200_OK)
+
         
