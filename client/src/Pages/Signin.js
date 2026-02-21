@@ -1,10 +1,44 @@
 import { Box } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import axios from "../axiosInstance";
+import { LoginApi } from "../Api";
+import { useNotification } from "../NotificationContext";
 
 const Signin = () => {
   const navigate = useNavigate();
+  const showNotification = useNotification();
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(LoginApi, formData);
+      if (response.data.Status === 6000) {
+        // showNotification("Login successful!", "success");
+        // Clear any old session data
+        localStorage.clear();
+        localStorage.setItem("username", response.data.username);
+        localStorage.setItem("access_token", response.data.tokens.access);
+        localStorage.setItem("refresh_token", response.data.tokens.refresh);
+        navigate("/dashboard");
+      } else {
+        showNotification("Login failed: " + response.data.message, "error");
+      }
+    } catch (error) {
+      console.error("Signin error:", error);
+      showNotification("Invalid credentials or server error.", "error");
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -18,7 +52,7 @@ const Signin = () => {
       }}
     >
       <StyledWrapper>
-        <form className="form">
+        <form className="form" onSubmit={handleSubmit}>
           <div className="flex-column">
             <label>Username </label>
           </div>
@@ -34,9 +68,13 @@ const Signin = () => {
               </g>
             </svg>
             <input
-              placeholder="Email or username"
+              placeholder="Username"
               className="input"
               type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              required
             />
           </div>
           <div className="flex-column">
@@ -56,6 +94,10 @@ const Signin = () => {
               placeholder="Enter your Password"
               className="input"
               type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
             />
           </div>
           <div className="flex-row">
@@ -65,13 +107,15 @@ const Signin = () => {
             </div>
             <span className="span">Forgot password?</span>
           </div>
-          <button className="button-submit">Sign In</button>
+          <button className="button-submit" type="submit">
+            Sign In
+          </button>
           <p className="p" onClick={() => navigate("/signup")}>
             Don't have an account? <span className="span">Sign Up</span>
           </p>
           <p className="p line">Or With</p>
           <div className="flex-row">
-            <button className="btn google">
+            <button className="btn google" type="button">
               <svg
                 xmlSpace="preserve"
                 style={{ enableBackground: "new 0 0 512 512" }}
@@ -111,7 +155,7 @@ const Signin = () => {
               </svg>
               Google
             </button>
-            <button className="btn apple">
+            <button className="btn apple" type="button">
               <svg
                 xmlSpace="preserve"
                 style={{ enableBackground: "new 0 0 22.773 22.773" }}

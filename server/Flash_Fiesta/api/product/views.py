@@ -1,4 +1,6 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from store.models import Product
 from rest_framework.response import Response
 from rest_framework import status
@@ -39,7 +41,10 @@ def ProductView(request):
     return Response(response_data, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def Create_Product(request):
+        print(f"DEBUG: Auth Header: {request.headers.get('Authorization')}")
         data = request.data
         ProductName = data['ProductName']
         try:

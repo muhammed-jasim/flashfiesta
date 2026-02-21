@@ -55,4 +55,4 @@ server/staticfiles/
 # ===================================
 # Flash_Fiesta settings 
 # ===================================
-server/Flash_Fiesta/settings.py
+# server/Flash_Fiesta/settings.py

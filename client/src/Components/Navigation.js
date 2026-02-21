@@ -40,6 +40,11 @@ export default function Navigation() {
     handleMobileMenuClose();
   };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = '/';
+  };
+
   const handleMobileMenuOpen = (event) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
@@ -63,6 +68,7 @@ export default function Navigation() {
     >
       <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
       <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      <MenuItem onClick={handleLogout}>Logout</MenuItem>
     </Menu>
   );
 
@@ -120,17 +126,17 @@ export default function Navigation() {
 
   return (
     <>
-        <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static" style={{backgroundColor:'white', color:'black'}}>
-            <Toolbar>
+      <Box sx={{ flexGrow: 1 }}>
+        <AppBar position="static" style={{ backgroundColor: 'white', color: 'black' }}>
+          <Toolbar>
             <IconButton
-                size="large"
-                edge="start"
-                color="inherit"
-                aria-label="open drawer"
-                sx={{ mr: 2 }}
+              size="large"
+              edge="start"
+              color="inherit"
+              aria-label="open drawer"
+              sx={{ mr: 2 }}
             >
-                <img src={logopng} style={{width:'120px'}} />
+              <img src={logopng} style={{ width: '120px' }} />
             </IconButton>
             {/* <Typography
                 variant="h6"
@@ -147,33 +153,33 @@ export default function Navigation() {
             <NavTxt >BEAUTY</NavTxt>
             <StyledLink to={"/studio"} className='Link'><NavTxt >STUDIO</NavTxt></StyledLink>
 
- 
-            <Search sx={{marginRight:"10px"}}>
-                <SearchIconWrapper>
+
+            <Search sx={{ marginRight: "10px" }}>
+              <SearchIconWrapper>
                 <SearchIcon />
-                </SearchIconWrapper>
-                <StyledInputBase
+              </SearchIconWrapper>
+              <StyledInputBase
                 placeholder="Search…"
                 inputProps={{ 'aria-label': 'search' }}
-                />
+              />
             </Search>
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-                <IconButton size="large" aria-label="show  4 new mails" color="inherit">
+              <IconButton size="large" aria-label="show  4 new mails" color="inherit">
                 <Badge badgeContent={4} color="error" >
-                    <LocalMallOutlinedIcon sx={{color:'	#696969'}} />
+                  <LocalMallOutlinedIcon sx={{ color: '	#696969' }} />
                 </Badge>
-                </IconButton>
-                <IconButton
+              </IconButton>
+              <IconButton
                 size="large"
                 aria-label="show 17 new notifications"
                 color="inherit"
-                >
+              >
                 <Badge badgeContent={17} color="error">
-                    <FavoriteBorderIcon  sx={{color:'	#696969'}} />
+                  <FavoriteBorderIcon sx={{ color: '	#696969' }} />
                 </Badge>
-                </IconButton>
-                <IconButton
+              </IconButton>
+              <IconButton
                 size="large"
                 edge="end"
                 aria-label="account of current user"
@@ -181,91 +187,90 @@ export default function Navigation() {
                 aria-haspopup="true"
                 onClick={handleProfileMenuOpen}
                 color="inherit"
-                >
-                <PersonOutlinedIcon sx={{fontSize:'xx-large',color:'#696969'}} />
-                </IconButton>
+              >
+                <PersonOutlinedIcon sx={{ fontSize: 'xx-large', color: '#696969' }} />
+              </IconButton>
             </Box>
             <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-                <IconButton
+              <IconButton
                 size="large"
                 aria-label="show more"
                 aria-controls={mobileMenuId}
                 aria-haspopup="true"
                 onClick={handleMobileMenuOpen}
                 color="inherit"
-                >
+              >
                 <MoreIcon />
-                </IconButton>
+              </IconButton>
             </Box>
-            </Toolbar>
+          </Toolbar>
         </AppBar>
         {renderMobileMenu}
         {renderMenu}
-    </Box>
+      </Box>
     </>
   );
 }
 
-  
+
 
 const Search = styled('div')(({ theme }) => ({
-    position: 'relative',
-    left: '100px',
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: '#eaeaea',
-    // '&:hover': {
-    //   backgroundColor: alpha(theme.palette.common.white, 0.25),
-    // },
-    marginRight: theme.spacing(2),
-    marginLeft: 0,
+  position: 'relative',
+  left: '100px',
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: '#eaeaea',
+  // '&:hover': {
+  //   backgroundColor: alpha(theme.palette.common.white, 0.25),
+  // },
+  marginRight: theme.spacing(2),
+  marginLeft: 0,
+  width: '100%',
+  [theme.breakpoints.up('sm')]: {
+    marginLeft: theme.spacing(3),
+    width: 'auto',
+  },
+  '& .MuiInputBase-root': {
+    width: "100%"
+  }
+
+}));
+
+const SearchIconWrapper = styled('div')(({ theme }) => ({
+  padding: theme.spacing(0, 2),
+  height: '100%',
+  position: 'absolute',
+  pointerEvents: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: "#586161"
+}));
+
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: 'inherit',
+  '& .MuiInputBase-input': {
+    padding: theme.spacing(1, 1, 1, 0),
+    // vertical padding + font size from searchIcon
+    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    transition: theme.transitions.create('width'),
     width: '100%',
-    [theme.breakpoints.up('sm')]: {
-      marginLeft: theme.spacing(3),
-      width: 'auto',
+    [theme.breakpoints.up('md')]: {
+      width: '39ch',
     },
-    '& .MuiInputBase-root' : {
-      width : "100%"
-    }
 
-  }));
-  
-  const SearchIconWrapper = styled('div')(({ theme }) => ({
-    padding: theme.spacing(0, 2),
-    height: '100%',
-    position: 'absolute',
-    pointerEvents: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: "#586161"  
-  }));
-  
-  const StyledInputBase = styled(InputBase)(({ theme }) => ({
-    color: 'inherit',
-    '& .MuiInputBase-input': {
-      padding: theme.spacing(1, 1, 1, 0),
-      // vertical padding + font size from searchIcon
-      paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-      transition: theme.transitions.create('width'),
-      width: '100%',
-      [theme.breakpoints.up('md')]: {
-        width: '39ch',
-      },
+  },
+}));
 
-    },
-  }));
-
-  const StyledLink = styled(Link)`
+const StyledLink = styled(Link)`
   text-decoration: none;
 `;
 
-  const NavTxt = styled("p") ({
-    fontSize : "13px",
-    margin: '15px',
-    fontFamily:'sans-serif',
-    fontWeight: 'bold',
-    color: "#586161",
-    cursor: 'pointer',
-  })
+const NavTxt = styled("p")({
+  fontSize: "13px",
+  margin: '15px',
+  fontFamily: 'sans-serif',
+  fontWeight: 'bold',
+  color: "#586161",
+  cursor: 'pointer',
+})
 
-  

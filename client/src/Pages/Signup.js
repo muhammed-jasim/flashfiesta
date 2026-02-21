@@ -1,11 +1,44 @@
 import { Box } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import axios from "../axiosInstance";
+import { RegisterApi } from "../Api";
+import { useNotification } from "../NotificationContext";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const showNotification = useNotification();
+  const [formData, setFormData] = useState({
+    email: "",
+    username: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(RegisterApi, formData);
+      if (response.data.Status === 6000) {
+        showNotification("Registration successful! Welcome.", "success");
+        localStorage.setItem("username", response.data.username);
+        localStorage.setItem("access_token", response.data.tokens.access);
+        localStorage.setItem("refresh_token", response.data.tokens.refresh);
+        navigate("/dashboard");
+      } else {
+        showNotification("Registration failed: " + JSON.stringify(response.data.errors), "error");
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+      showNotification("An error occurred during signup.", "error");
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -19,7 +52,7 @@ const Signup = () => {
       }}
     >
       <StyledWrapper>
-        <form className="form">
+        <form className="form" onSubmit={handleSubmit}>
           <div className="flex-column">
             <label>Email </label>
           </div>
@@ -34,7 +67,15 @@ const Signup = () => {
                 <path d="m30.853 13.87a15 15 0 0 0 -29.729 4.082 15.1 15.1 0 0 0 12.876 12.918 15.6 15.6 0 0 0 2.016.13 14.85 14.85 0 0 0 7.715-2.145 1 1 0 1 0 -1.031-1.711 13.007 13.007 0 1 1 5.458-6.529 2.149 2.149 0 0 1 -4.158-.759v-10.856a1 1 0 0 0 -2 0v1.726a8 8 0 1 0 .2 10.325 4.135 4.135 0 0 0 7.83.274 15.2 15.2 0 0 0 .823-7.455zm-14.853 8.13a6 6 0 1 1 6-6 6.006 6.006 0 0 1 -6 6z" />
               </g>
             </svg>
-            <input placeholder="Email" className="input" type="text" />
+            <input
+              placeholder="Email"
+              className="input"
+              type="text"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div className="flex-column">
@@ -42,7 +83,15 @@ const Signup = () => {
           </div>
           <div className="inputForm">
             <AccountCircleIcon />
-            <input placeholder="username" className="input" type="text" />
+            <input
+              placeholder="username"
+              className="input"
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div className="flex-column">
@@ -62,6 +111,10 @@ const Signup = () => {
               placeholder="Enter your Password"
               className="input"
               type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
             />
           </div>
           <div className="flex-row">
@@ -71,13 +124,15 @@ const Signup = () => {
             </div>
             <span className="span">Forgot password?</span>
           </div>
-          <button className="button-submit">Sign In</button>
+          <button className="button-submit" type="submit">
+            Sign Up
+          </button>
           <p className="p" onClick={() => navigate("/")}>
             Already have an account? <span className="span">Sign In</span>
           </p>
           <p className="p line">Or With</p>
           <div className="flex-row">
-            <button className="btn google">
+            <button className="btn google" type="button">
               <svg
                 xmlSpace="preserve"
                 style={{ enableBackground: "new 0 0 512 512" }}
@@ -117,7 +172,7 @@ const Signup = () => {
               </svg>
               Google
             </button>
-            <button className="btn apple">
+            <button className="btn apple" type="button">
               <svg
                 xmlSpace="preserve"
                 style={{ enableBackground: "new 0 0 22.773 22.773" }}

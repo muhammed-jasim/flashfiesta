@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
-import axios from 'axios';
+import axios from '../axiosInstance';
 import { ProductDeatailsApi } from '../Api';
 import { Typography } from '@mui/material';
 
@@ -18,7 +18,7 @@ const DashbordCard = (props) => {
   };
   useEffect(() => {
     fetchProductDetails();
-  },[]);
+  }, []);
 
   return (
     <Box
@@ -32,15 +32,15 @@ const DashbordCard = (props) => {
         },
       }}
     >
-      {Products.map((i,index) => (
+      {Products.map((i, index) => (
         <>
-        <Paper 
-          key={index}
-        />
-        <Typography>{i.ProductName}</Typography>
-        <Typography>{i.ProductID}</Typography>
+          <Paper
+            key={index}
+          />
+          <Typography>{i.ProductName}</Typography>
+          <Typography>{i.ProductID}</Typography>
         </>
-      ))} 
+      ))}
 
     </Box>
   )

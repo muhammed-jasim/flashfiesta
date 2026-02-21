@@ -22,5 +22,6 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('store.urls')),
-    path('api/product/',include("Flash_Fiesta.api.product.urls"))
+    path('api/product/',include("Flash_Fiesta.api.product.urls")),
+    path('api/auth/', include("Flash_Fiesta.api.auth.urls")),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

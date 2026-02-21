@@ -6,17 +6,20 @@ import Admin from "./Pages/Admin.js";
 import Printtemplate from "./Pages/Printtemplate.js";
 import Signin from "./Pages/Signin.js";
 import Signup from "./Pages/Signup.js";
+import NotFound from "./Pages/NotFound.js";
+import ProtectedRoute from "./Components/ProtectedRoute.js";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="dashboard" element={<Home />} />
-        <Route path="myadmin" element={<Admin />} />
+        <Route path="dashboard" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="myadmin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
         <Route path="navigation" element={<Layout />} />
         <Route path="/" element={<Signin />} />
         <Route path="signup" element={<Signup />} />
         <Route path="studio" element={<Printtemplate />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

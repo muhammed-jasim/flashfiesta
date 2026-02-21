@@ -1,21 +1,23 @@
 import React, { useState } from 'react'
 import styled from 'styled-components';
 import AddIcon from '@mui/icons-material/Add';
-import axios from 'axios';
+import axios from '../axiosInstance';
 import { CreteProduct } from '../Api';
+import { useNotification } from '../NotificationContext';
 
 
 const Admin = () => {
+  const showNotification = useNotification();
   const [State, setState] = useState({
     ProductName: '',
     Description: '',
     ProductImage: '',
     Qty: 0,
-    ProductPrice:0,
+    ProductPrice: 0,
   });
-  
+
   const handleChange = (e) => {
-    const {name,value} = e.target;
+    const { name, value } = e.target;
     setState((prevstate) => ({
       ...prevstate,
       [name]: value
@@ -27,21 +29,43 @@ const Admin = () => {
       Description: '',
       ProductImage: '',
       Qty: 0,
-      ProductPrice: 0,    
+      ProductPrice: 0,
     })
   }
 
-  const AddProduct = async() => {
+  const AddProduct = async () => {
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+      showNotification("You are not logged in. Please sign in first.", "error");
+      return;
+    }
+
     try {
-      const data = await axios.post(CreteProduct,{
-        ProductName : State.ProductName,
-        Description : State.Description,
-        ProductImage : State.ProductImage,
-        Qty : State.Qty,
-        Rate : State.ProductPrice
+      const response = await axios.post(CreteProduct, {
+        ProductName: State.ProductName,
+        Description: State.Description,
+        ProductImage: State.ProductImage,
+        Qty: State.Qty,
+        Rate: State.ProductPrice
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       })
-    }catch{
-      console.log('Create Product Api Error');
+      if (response.data.Status === 6000) {
+        showNotification("Product added successfully!", "success");
+        handleClear();
+      } else {
+        showNotification("Error: " + response.data.data, "error");
+      }
+    } catch (error) {
+      console.log('Create Product Api Error', error);
+      if (error.response && error.response.status === 401) {
+        showNotification("Session expired or invalid. Please login again.", "error");
+      } else {
+        showNotification("Failed to add product.", "error");
+      }
     }
   }
 
@@ -61,25 +85,25 @@ const Admin = () => {
           <TxtHeading>Camera</TxtHeading>
         </SubDIv>
         <SubDIv>
-          <TxtHeading>Name</TxtHeading> 
-            <InputBox name='ProductName' value={State.ProductName} onChange={handleChange}/>
+          <TxtHeading>Name</TxtHeading>
+          <InputBox name='ProductName' value={State.ProductName} onChange={handleChange} />
           <TxtHeading>Description </TxtHeading>
-            <InputBox name='Description' value={State.Description} onChange={handleChange} />
+          <InputBox name='Description' value={State.Description} onChange={handleChange} />
           <TxtHeading>Image</TxtHeading>
-            <FileInput name='ProductImage' value={State.ProductImage }onChange={handleChange} />
+          <FileInput name='ProductImage' onChange={handleChange} />
           <TxtHeading>Qty</TxtHeading>
-            <InputBox name='Qty' value={State.Qty} onChange={handleChange} />
+          <InputBox name='Qty' value={State.Qty} onChange={handleChange} />
           <TxtHeading>Rate</TxtHeading>
-            <InputBox name='ProductPrice' value={State.ProductPrice} onChange={handleChange} />
+          <InputBox name='ProductPrice' value={State.ProductPrice} onChange={handleChange} />
           <SubmitBox
             onClick={AddProduct}
           >Add Product</SubmitBox>
-          <AddIcon 
+          <AddIcon
             sx={{
               color: 'blue',
               float: 'right',
-              fontSize:'35px',
-              margin:'18px',
+              fontSize: '35px',
+              margin: '18px',
             }}
             onClick={handleClear}
           />
@@ -146,7 +170,7 @@ const SubmitBox = styled.div`
 `
 const FileInput = styled.input.attrs({
   type: 'file',
-  accept: 'image/*' 
+  accept: 'image/*'
 })`
   border-radius: 4px;
   font-size: 15px;
