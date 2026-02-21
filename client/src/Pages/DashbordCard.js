@@ -103,9 +103,9 @@ const DashbordCard = ({ products = [] }) => {
   return (
     <Grid container spacing={4}>
       {products.map((product, index) => (
-        <Grid item xs={12} sm={6} md={3} key={product.ProductID || index}>
+        <Grid item xs={12} sm={6} md={3} key={product.id || index}>
           <StyledCard
-            onClick={() => navigate(`/product/${product.ProductID}`)}
+            onClick={() => navigate(`/product/${product.id}`)}
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -126,7 +126,7 @@ const DashbordCard = ({ products = [] }) => {
 
             <Content>
               <Typography variant="caption" sx={{ color: '#6B7280', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Electronics
+                {product.category_details?.name || 'Flash Release'}
               </Typography>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, fontSize: '18px', color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {product.ProductName}

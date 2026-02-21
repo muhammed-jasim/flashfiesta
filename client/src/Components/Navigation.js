@@ -1,9 +1,8 @@
 import * as React from 'react';
-import { styled, alpha } from '@mui/material/styles';
-import { AppBar, Toolbar, IconButton, Badge, MenuItem, Menu, Box, InputBase, Container } from '@mui/material';
-import { Search, Heart, ShoppingBag, User, MoreVertical, LogOut } from 'lucide-react';
+import { styled } from '@mui/material/styles';
+import { AppBar, Toolbar, IconButton, Badge, MenuItem, Menu, Box, InputBase, Container, Typography } from '@mui/material';
+import { Search, Heart, ShoppingBag, User, LogOut } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import logopng from '../myntra-logo-m-png-3.png';
 import { useCart } from '../CartContext';
 import CartDrawer from './CartDrawer';
 
@@ -145,6 +144,9 @@ export default function Navigation() {
     </Menu>
   );
 
+  const role = localStorage.getItem('user_role');
+  const isAdmin = role === 'OWNER' || role === 'EMPLOYEE';
+
   return (
     <NavContainer position="sticky">
       <Container maxWidth="xl">
@@ -155,8 +157,12 @@ export default function Navigation() {
 
           <NavLinks>
             <NavItem to="/dashboard">Flash Deals</NavItem>
-            <NavItem to="/categories">Categories</NavItem>
-            <NavItem to="/trending">Trending</NavItem>
+            <NavItem to="/dashboard#categories" onClick={() => {
+              const el = document.getElementById('categories');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }}>Categories</NavItem>
+            <NavItem to="/dashboard?trending=true">Trending</NavItem>
+            {isAdmin && <NavItem to="/myadmin" sx={{ color: '#12B76A !important', fontWeight: 'bold' }}>Admin</NavItem>}
           </NavLinks>
 
           <Box sx={{ flexGrow: 1 }} />
@@ -167,6 +173,11 @@ export default function Navigation() {
               placeholder="Search limited products..."
               sx={{ ml: 1, flex: 1, fontSize: '14px', fontWeight: 500 }}
               inputProps={{ 'aria-label': 'search' }}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  navigate(`/dashboard?search=${e.target.value}`);
+                }
+              }}
             />
           </SearchWrapper>
 
@@ -181,16 +192,21 @@ export default function Navigation() {
                 <ShoppingBag size={24} strokeWidth={1.5} />
               </Badge>
             </IconBtn>
-            <IconBtn
-              size="large"
-              edge="end"
-              aria-label="account of current user"
-              aria-controls={menuId}
-              aria-haspopup="true"
-              onClick={handleProfileMenuOpen}
-            >
-              <User size={24} strokeWidth={1.5} />
-            </IconBtn>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 1, cursor: 'pointer' }} onClick={handleProfileMenuOpen}>
+              <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
+                <Typography variant="caption" sx={{ color: '#9CA3AF', fontWeight: 600, display: 'block', lineHeight: 1 }}>Welcome,</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 800, color: '#111827' }}>{localStorage.getItem('username') || 'Guest'}</Typography>
+              </Box>
+              <IconBtn
+                size="large"
+                edge="end"
+                aria-label="account of current user"
+                aria-controls={menuId}
+                aria-haspopup="true"
+              >
+                <User size={24} strokeWidth={1.5} />
+              </IconBtn>
+            </Box>
           </Box>
         </Toolbar>
       </Container>

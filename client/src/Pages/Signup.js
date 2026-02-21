@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, Typography, TextField, Button, Paper, InputAdornment, IconButton, Container, Divider } from "@mui/material";
 import { useNavigate, Link } from "react-router-dom";
-import { User, Lock, Mail, Github, Chrome, ShieldCheck } from "lucide-react";
+import { User, Lock, Mail, Github, Chrome, ShieldCheck, Phone } from "lucide-react";
 import styled from "styled-components";
 import axios from "../axiosInstance";
 import { RegisterApi } from "../Api";
@@ -45,7 +45,7 @@ const SocialButton = styled(Button)`
 const Signup = () => {
   const navigate = useNavigate();
   const showNotification = useNotification();
-  const [formData, setFormData] = useState({ email: "", username: "", password: "" });
+  const [formData, setFormData] = useState({ email: "", username: "", password: "", phone_number: "" });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -59,6 +59,7 @@ const Signup = () => {
       const response = await axios.post(RegisterApi, formData);
       if (response.data.Status === 6000) {
         localStorage.setItem("username", response.data.username);
+        localStorage.setItem("user_role", response.data.role || 'CUSTOMER');
         localStorage.setItem("access_token", response.data.tokens.access);
         localStorage.setItem("refresh_token", response.data.tokens.refresh);
         showNotification("Account created successfully! Welcome.", "success");
@@ -112,6 +113,18 @@ const Signup = () => {
               required
               InputProps={{
                 startAdornment: <InputAdornment position="start"><User size={20} color="#9CA3AF" /></InputAdornment>,
+              }}
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+            />
+            <TextField
+              fullWidth
+              label="Phone Number"
+              name="phone_number"
+              value={formData.phone_number}
+              onChange={handleChange}
+              placeholder="+1 234 567 890"
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><Phone size={20} color="#9CA3AF" /></InputAdornment>,
               }}
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
             />

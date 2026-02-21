@@ -60,6 +60,7 @@ const Signin = () => {
       if (data.Status === 6000) {
         localStorage.clear();
         localStorage.setItem("username", data.username);
+        localStorage.setItem("user_role", data.role);
         localStorage.setItem("access_token", data.tokens.access);
         localStorage.setItem("refresh_token", data.tokens.refresh);
         showNotification("Welcome back to Flash Fiesta!", "success");
