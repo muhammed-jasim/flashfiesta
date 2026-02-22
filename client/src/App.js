@@ -8,11 +8,23 @@ import Signin from "./Pages/Signin.js";
 import Signup from "./Pages/Signup.js";
 import NotFound from "./Pages/NotFound.js";
 import ProtectedRoute from "./Components/ProtectedRoute.js";
+import ProductDetails from "./Pages/ProductDetails.js";
+import Checkout from "./Pages/Checkout.js";
+
+import Orders from "./Pages/Orders.js";
+
+import Profile from "./Pages/Profile.js";
+import Wishlist from "./Pages/Wishlist.js";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+        <Route path="checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+        <Route path="orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+        <Route path="product/:id" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>} />
         <Route path="dashboard" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path="myadmin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
         <Route path="navigation" element={<Layout />} />

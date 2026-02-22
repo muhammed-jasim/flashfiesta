@@ -24,4 +24,5 @@ urlpatterns = [
     path('',include('store.urls')),
     path('api/product/',include("Flash_Fiesta.api.product.urls")),
     path('api/auth/', include("Flash_Fiesta.api.auth.urls")),
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('api/order/', include("Flash_Fiesta.api.order.urls")),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

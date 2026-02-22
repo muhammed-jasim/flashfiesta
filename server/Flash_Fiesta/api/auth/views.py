@@ -1,9 +1,11 @@
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer
 
 def get_tokens_for_user(user):
@@ -23,7 +25,8 @@ def register_user(request):
             'Status': 6000, 
             'message': 'User registered successfully',
             'tokens': tokens,
-            'username': user.username
+            'username': user.username,
+            'role': user.profile.role
         }, status=status.HTTP_201_CREATED)
     return Response({'Status': 6001, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -33,11 +36,60 @@ def login_user(request):
     password = request.data.get('password')
     user = authenticate(username=username, password=password)
     if user:
+        from store.models import UserProfile
+        # Ensure profile exists (for older users)
+        profile, created = UserProfile.objects.get_or_create(user=user)
         tokens = get_tokens_for_user(user)
         return Response({
             'Status': 6000, 
             'message': 'Login successful', 
             'username': user.username,
+            'role': profile.role,
             'tokens': tokens
         }, status=status.HTTP_200_OK)
     return Response({'Status': 6001, 'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def get_user_profile(request):
+    serializer = UserSerializer(request.user)
+    return Response({'Status': 6000, 'data': serializer.data}, status=status.HTTP_200_OK)
+
+@api_view(['POST', 'PUT'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def update_user_profile(request):
+    serializer = UserSerializer(request.user, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'Status': 6000, 'message': 'Profile updated', 'data': serializer.data}, status=status.HTTP_200_OK)
+    return Response({'Status': 6001, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def list_employees(request):
+    if request.user.profile.role != 'OWNER':
+        return Response({'Status': 6001, 'message': 'Owner only'}, status=status.HTTP_403_FORBIDDEN)
+    employees = User.objects.filter(profile__role='EMPLOYEE')
+    serializer = UserSerializer(employees, many=True)
+    return Response({'Status': 6000, 'data': serializer.data})
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def update_employee_permissions(request, pk):
+    if request.user.profile.role != 'OWNER':
+        return Response({'Status': 6001, 'message': 'Owner only'}, status=status.HTTP_403_FORBIDDEN)
+    try:
+        user = User.objects.get(pk=pk)
+        profile = user.profile
+        data = request.data
+        profile.can_view_stats = data.get('can_view_stats', profile.can_view_stats)
+        profile.can_manage_products = data.get('can_manage_products', profile.can_manage_products)
+        profile.can_manage_categories = data.get('can_manage_categories', profile.can_manage_categories)
+        profile.can_manage_orders = data.get('can_manage_orders', profile.can_manage_orders)
+        profile.save()
+        return Response({'Status': 6000, 'message': 'Permissions updated'})
+    except User.DoesNotExist:
+        return Response({'Status': 6001, 'message': 'Employee not found'}, status=status.HTTP_404_NOT_FOUND)
