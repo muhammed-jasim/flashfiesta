@@ -64,3 +64,32 @@ def update_user_profile(request):
         serializer.save()
         return Response({'Status': 6000, 'message': 'Profile updated', 'data': serializer.data}, status=status.HTTP_200_OK)
     return Response({'Status': 6001, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def list_employees(request):
+    if request.user.profile.role != 'OWNER':
+        return Response({'Status': 6001, 'message': 'Owner only'}, status=status.HTTP_403_FORBIDDEN)
+    employees = User.objects.filter(profile__role='EMPLOYEE')
+    serializer = UserSerializer(employees, many=True)
+    return Response({'Status': 6000, 'data': serializer.data})
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def update_employee_permissions(request, pk):
+    if request.user.profile.role != 'OWNER':
+        return Response({'Status': 6001, 'message': 'Owner only'}, status=status.HTTP_403_FORBIDDEN)
+    try:
+        user = User.objects.get(pk=pk)
+        profile = user.profile
+        data = request.data
+        profile.can_view_stats = data.get('can_view_stats', profile.can_view_stats)
+        profile.can_manage_products = data.get('can_manage_products', profile.can_manage_products)
+        profile.can_manage_categories = data.get('can_manage_categories', profile.can_manage_categories)
+        profile.can_manage_orders = data.get('can_manage_orders', profile.can_manage_orders)
+        profile.save()
+        return Response({'Status': 6000, 'message': 'Permissions updated'})
+    except User.DoesNotExist:
+        return Response({'Status': 6001, 'message': 'Employee not found'}, status=status.HTTP_404_NOT_FOUND)

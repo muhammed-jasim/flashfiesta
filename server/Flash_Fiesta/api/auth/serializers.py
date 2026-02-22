@@ -8,9 +8,14 @@ class UserSerializer(serializers.ModelSerializer):
     city = serializers.CharField(source='profile.city', required=False)
     zip_code = serializers.CharField(source='profile.zip_code', required=False)
     
+    can_view_stats = serializers.BooleanField(source='profile.can_view_stats', read_only=True)
+    can_manage_products = serializers.BooleanField(source='profile.can_manage_products', read_only=True)
+    can_manage_categories = serializers.BooleanField(source='profile.can_manage_categories', read_only=True)
+    can_manage_orders = serializers.BooleanField(source='profile.can_manage_orders', read_only=True)
+    
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'role', 'phone_number', 'address', 'city', 'zip_code']
+        fields = ['id', 'username', 'email', 'password', 'role', 'phone_number', 'address', 'city', 'zip_code', 'can_view_stats', 'can_manage_products', 'can_manage_categories', 'can_manage_orders']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):

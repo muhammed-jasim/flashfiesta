@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Container, Stepper, Step, StepLabel, Typography, Button, Paper, Grid, TextField, Divider, RadioGroup, FormControlLabel, Radio, Avatar, CircularProgress } from '@mui/material';
 import { ChevronLeft, CreditCard, CheckCircle2 } from 'lucide-react';
-import { useCart } from '../CartContext';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectCartItems, selectCartTotal, clearCart } from '../cartSlice';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '../Components/Navigation';
 import styled from 'styled-components';
@@ -18,9 +19,12 @@ const CheckoutItem = styled(Box)`
 `;
 
 const Checkout = () => {
+    const dispatch = useDispatch();
     const [activeStep, setActiveStep] = useState(0);
     const [loading, setLoading] = useState(false);
-    const { cart, cartTotal, clearCart } = useCart();
+    const cart = useSelector(selectCartItems);
+    const cartTotal = useSelector(selectCartTotal);
+    const handleClearCart = () => dispatch(clearCart());
     const navigate = useNavigate();
     const showNotification = useNotification();
 
@@ -84,7 +88,7 @@ const Checkout = () => {
 
                 const response = await axios.post(PlaceOrderApi, orderData);
                 if (response.data.Status === 6000) {
-                    clearCart();
+                    handleClearCart();
                     setActiveStep(activeStep + 1);
                 } else {
                     showNotification(response.data.message || "Failed to place order", "error");
@@ -127,7 +131,7 @@ const Checkout = () => {
                 <Paper sx={{ p: 4, borderRadius: '24px', backgroundColor: '#F9FAFB', border: '1px solid #F3F4F6', boxShadow: 'none' }}>
                     <Typography variant="h6" sx={{ fontWeight: 800, mb: 3 }}>Summary</Typography>
                     {cart.map(item => (
-                        <CheckoutItem key={item.ProductID}>
+                        <CheckoutItem key={item.id}>
                             <Avatar src={item.ProductImage} variant="rounded" />
                             <Box>
                                 <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{item.ProductName}</Typography>

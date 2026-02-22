@@ -1,10 +1,15 @@
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
-import { AppBar, Toolbar, IconButton, Badge, MenuItem, Menu, Box, InputBase, Container, Typography } from '@mui/material';
+import { AppBar, Toolbar, IconButton, Badge, MenuItem, Menu, Box, InputBase, Container, Typography, Avatar } from '@mui/material';
 import { Search, Heart, ShoppingBag, User, LogOut } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../CartContext';
+import { useWishlist } from '../WishlistContext';
+import axios from '../axiosInstance';
+import { SearchSuggestionsApi } from '../Api';
 import CartDrawer from './CartDrawer';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectCartCount, fetchCart, syncCartToBackend, clearCart } from '../cartSlice';
 
 const NavContainer = styled(AppBar)(({ theme }) => ({
   backgroundColor: '#FFFFFF',
@@ -102,10 +107,36 @@ const IconBtn = styled(IconButton)`
   }
 `;
 
+
+
 export default function Navigation() {
   const navigate = useNavigate();
-  const { cartCount } = useCart();
+  const dispatch = useDispatch();
+  const cartCount = useSelector(selectCartCount);
   const [isCartOpen, setIsCartOpen] = React.useState(false);
+
+  const { wishlist, fetchWishlist } = useWishlist();
+
+  const cart = useSelector(state => state.cart.items);
+  const cartStatus = useSelector(state => state.cart.status);
+
+  React.useEffect(() => {
+    if (cartStatus === 'idle') {
+      dispatch(fetchCart());
+      fetchWishlist();
+    }
+  }, [dispatch, fetchWishlist, cartStatus]);
+
+  React.useEffect(() => {
+    // Debounce sync to backend to avoid multiple calls
+    const timer = setTimeout(() => {
+      if (localStorage.getItem('access_token') && cartStatus === 'succeeded') {
+        dispatch(syncCartToBackend(cart));
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [cart, dispatch, cartStatus]);
+
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
 
@@ -120,7 +151,11 @@ export default function Navigation() {
   };
 
   const handleLogout = () => {
-    localStorage.clear();
+    dispatch(clearCart());
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('username');
+    localStorage.removeItem('user_role');
     window.location.href = '/';
   };
 
@@ -143,6 +178,46 @@ export default function Navigation() {
       </MenuItem>
     </Menu>
   );
+
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const initialSearch = searchParams.get('search') || '';
+  const [searchValue, setSearchValue] = React.useState(initialSearch);
+  const [suggestions, setSuggestions] = React.useState([]);
+  const [showSuggestions, setShowSuggestions] = React.useState(false);
+  const suggestionRef = React.useRef(null);
+
+  React.useEffect(() => {
+    setSearchValue(initialSearch);
+  }, [initialSearch]);
+
+  React.useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (searchValue.trim().length >= 2) {
+        try {
+          const { data } = await axios.get(SearchSuggestionsApi, {
+            params: { q: searchValue.trim() }
+          });
+          if (data.Status === 6000) setSuggestions(data.data);
+        } catch (err) { console.error(err); }
+      } else {
+        setSuggestions([]);
+      }
+    };
+    const timer = setTimeout(fetchSuggestions, 300);
+    return () => clearTimeout(timer);
+  }, [searchValue]);
+
+  // Close suggestions when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (suggestionRef.current && !suggestionRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const role = localStorage.getItem('user_role');
   const isAdmin = role === 'OWNER' || role === 'EMPLOYEE';
@@ -167,24 +242,66 @@ export default function Navigation() {
 
           <Box sx={{ flexGrow: 1 }} />
 
-          <SearchWrapper>
+          <SearchWrapper ref={suggestionRef}>
             <Search size={18} color="#9CA3AF" />
             <InputBase
               placeholder="Search limited products..."
               sx={{ ml: 1, flex: 1, fontSize: '14px', fontWeight: 500 }}
               inputProps={{ 'aria-label': 'search' }}
+              value={searchValue}
+              onFocus={() => setShowSuggestions(true)}
+              onChange={(e) => {
+                setSearchValue(e.target.value);
+                setShowSuggestions(true);
+              }}
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
-                  navigate(`/dashboard?search=${e.target.value}`);
+                  setShowSuggestions(false);
+                  const params = new URLSearchParams(location.search);
+                  if (searchValue.trim()) {
+                    params.set('search', searchValue.trim());
+                  } else {
+                    params.delete('search');
+                  }
+                  navigate(`/dashboard?${params.toString()}`);
                 }
               }}
             />
+            {showSuggestions && suggestions.length > 0 && (
+              <Box sx={{
+                position: 'absolute', top: '100%', left: 0, right: 0,
+                bgcolor: 'white', border: '1px solid #E5E7EB', borderRadius: '12px',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.1)', mt: 1, zIndex: 1000,
+                overflow: 'hidden'
+              }}>
+                {suggestions.map((name, index) => (
+                  <Box
+                    key={index}
+                    onClick={() => {
+                      setShowSuggestions(false);
+                      setSearchValue(name);
+                      const params = new URLSearchParams(location.search);
+                      params.set('search', name);
+                      navigate(`/dashboard?${params.toString()}`);
+                    }}
+                    sx={{
+                      p: 1.5, display: 'flex', alignItems: 'center', gap: 2,
+                      cursor: 'pointer', '&:hover': { bgcolor: '#F9FAFB' },
+                      borderBottom: '1px solid #F3F4F6'
+                    }}
+                  >
+                    <Search size={16} color="#9CA3AF" />
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{name}</Typography>
+                  </Box>
+                ))}
+              </Box>
+            )}
           </SearchWrapper>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconBtn size="large">
-              <Badge badgeContent={17} color="error" sx={{ '& .MuiBadge-badge': { backgroundColor: '#12B76A' } }}>
-                <Heart size={24} strokeWidth={1.5} />
+            <IconBtn size="large" onClick={() => navigate('/wishlist')} sx={{ color: wishlist.length > 0 ? '#F43F5E' : 'inherit' }}>
+              <Badge badgeContent={wishlist.length} color="error" sx={{ '& .MuiBadge-badge': { backgroundColor: '#F43F5E' } }}>
+                <Heart size={24} strokeWidth={1.5} fill={wishlist.length > 0 ? '#F43F5E' : 'transparent'} />
               </Badge>
             </IconBtn>
             <IconBtn size="large" onClick={() => setIsCartOpen(true)}>

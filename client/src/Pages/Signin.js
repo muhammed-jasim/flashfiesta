@@ -58,7 +58,12 @@ const Signin = () => {
     try {
       const { data } = await axios.post(LoginApi, formData);
       if (data.Status === 6000) {
-        localStorage.clear();
+        // Clear only auth tokens to prevent session mixing, but KEEP the cart
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("user_role");
+        localStorage.removeItem("username");
+
         localStorage.setItem("username", data.username);
         localStorage.setItem("user_role", data.role);
         localStorage.setItem("access_token", data.tokens.access);

@@ -4,7 +4,9 @@ import { Heart, ShoppingCart, Timer } from 'lucide-react';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { useCart } from '../CartContext';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../cartSlice';
+import { useWishlist } from '../WishlistContext';
 
 const StyledCard = styled(motion.div)`
   background: white;
@@ -69,7 +71,6 @@ const WishlistBtn = styled(IconButton)`
   
   &:hover {
     background: white;
-    color: #F43F5E;
   }
 `;
 
@@ -93,11 +94,17 @@ const StockProgress = styled(Box)`
 
 const DashbordCard = ({ products = [] }) => {
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const dispatch = useDispatch();
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   const handleAddToCart = (e, product) => {
     e.stopPropagation();
-    addToCart(product);
+    dispatch(addToCart(product));
+  };
+
+  const handleWishlist = (e, product) => {
+    e.stopPropagation();
+    toggleWishlist(product);
   };
 
   return (
@@ -115,8 +122,15 @@ const DashbordCard = ({ products = [] }) => {
               <DealBadge>
                 FLASH SALE
               </DealBadge>
-              <WishlistBtn size="small">
-                <Heart size={18} />
+              <WishlistBtn
+                size="small"
+                onClick={(e) => handleWishlist(e, product)}
+                sx={{
+                  color: isInWishlist(product.id) ? '#F43F5E' : '#4B5563',
+                  '&:hover': { color: '#F43F5E' }
+                }}
+              >
+                <Heart size={18} fill={isInWishlist(product.id) ? '#F43F5E' : 'transparent'} />
               </WishlistBtn>
               <img
                 src={product.ProductImage || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=500"}
@@ -137,7 +151,7 @@ const DashbordCard = ({ products = [] }) => {
                   ${product.Rate || '299.00'}
                 </Typography>
                 <Typography variant="body2" sx={{ color: '#9CA3AF', textDecoration: 'line-through' }}>
-                  ${(product.Rate * 1.4).toFixed(2) || '499.00'}
+                  ${(parseFloat(product.Rate || 0) * 1.4).toFixed(2) || '499.00'}
                 </Typography>
               </Box>
 

@@ -30,6 +30,7 @@ class ProductSerializer(serializers.ModelSerializer):
     Rate = serializers.ReadOnlyField(source='ProductPrice')
     Qty = serializers.ReadOnlyField(source='ProductQuantity')
     can_review = serializers.SerializerMethodField()
+    is_wishlisted = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -37,8 +38,17 @@ class ProductSerializer(serializers.ModelSerializer):
             'id', 'ProductID', 'ProductName', 'ProductDescription', 
             'ProductPrice', 'ProductQuantity', 'ProductImage', 
             'Rate', 'Qty', 'gallery', 'category', 'category_details', 
-            'is_trending', 'reviews', 'can_review'
+            'is_trending', 'reviews', 'can_review', 'is_wishlisted'
         ]
+
+    def get_is_wishlisted(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            try:
+                return request.user.profile.wishlist.filter(id=obj.id).exists()
+            except:
+                return False
+        return False
 
     def get_can_review(self, obj):
         request = self.context.get('request')
@@ -50,3 +60,11 @@ class ProductSerializer(serializers.ModelSerializer):
                 order__status='Delivered'
             ).exists()
         return False
+
+from store.models import CartItem
+
+class CartItemSerializer(serializers.ModelSerializer):
+    product_details = ProductSerializer(source='product', read_only=True)
+    class Meta:
+        model = CartItem
+        fields = ['id', 'product', 'product_details', 'quantity']

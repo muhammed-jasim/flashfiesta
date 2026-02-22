@@ -68,29 +68,42 @@ const Home = () => {
 
   useEffect(() => {
     fetchHomeData();
+
+    const scrollToResults = () => {
+      const el = document.getElementById('results');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    };
+
     if (location.hash) {
       const id = location.hash.replace('#', '');
       setTimeout(() => {
         const el = document.getElementById(id);
         if (el) el.scrollIntoView({ behavior: 'smooth' });
       }, 500);
+    } else if (searchQuery || catParam || trendingParam) {
+      setTimeout(scrollToResults, 600);
     }
   }, [searchQuery, catParam, trendingParam, location.hash]);
 
   const fetchHomeData = async () => {
     setLoading(true);
     try {
-      // Fetch Products
-      let url = `${ProductDeatailsApi}?`;
-      if (searchQuery) url += `search=${searchQuery}&`;
-      if (catParam) url += `category=${catParam}&`;
-      if (trendingParam) url += `trending=true&`;
-
-      const response = await axios.get(url);
+      // Fetch Products with robust param handling
+      const response = await axios.get(ProductDeatailsApi, {
+        params: {
+          search: searchQuery || undefined,
+          category: catParam || undefined,
+          trending: trendingParam || undefined
+        }
+      });
       setProducts(response.data.data);
 
       // Fetch Trending Products for the horizontal bar
-      const trendingRes = await axios.get(`${ProductDeatailsApi}?trending=true`);
+      const trendingRes = await axios.get(ProductDeatailsApi, {
+        params: { trending: 'true' }
+      });
       setTrendingProducts(trendingRes.data.data);
 
       // Fetch Categories
@@ -104,11 +117,14 @@ const Home = () => {
   };
 
   const handleCatClick = (catId) => {
-    if (catParam === catId) {
-      navigate('/dashboard');
+    const params = new URLSearchParams(location.search);
+    if (params.get('category') === catId) {
+      params.delete('category');
     } else {
-      navigate(`/dashboard?category=${catId}`);
+      params.set('category', catId);
     }
+    // Maintain search context if it exists
+    navigate(`/dashboard?${params.toString()}`);
   };
 
   return (
@@ -179,7 +195,7 @@ const Home = () => {
         )}
 
         {/* All Products */}
-        <SectionHeader>
+        <SectionHeader id="results">
           <Typography variant="h4" sx={{ fontWeight: 800 }}>
             {trendingParam ? 'Trending Flash Gear' : (catParam ? 'Category Items' : 'All Flash Deals')}
           </Typography>

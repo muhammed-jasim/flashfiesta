@@ -1,7 +1,8 @@
-import React from 'react';
-import { Drawer, Box, Typography, IconButton, Button, List, ListItem, Divider, Avatar, Stack } from '@mui/material';
+import React, { useEffect } from 'react';
+import { Drawer, Box, Typography, IconButton, Button, Avatar, Stack } from '@mui/material';
 import { ShoppingBag, X, Plus, Minus, Trash2, ArrowRight } from 'lucide-react';
-import { useCart } from '../CartContext';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectCartItems, selectCartTotal, removeFromCart, updateQuantity, syncCartToBackend } from '../cartSlice';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,8 +20,24 @@ const QtyBtn = styled(IconButton)`
 `;
 
 const CartDrawer = ({ open, onClose }) => {
-    const { cart, removeFromCart, updateQuantity, cartTotal } = useCart();
+    const dispatch = useDispatch();
+    const cart = useSelector(selectCartItems);
+    const cartTotal = useSelector(selectCartTotal);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (open) {
+            dispatch(syncCartToBackend(cart));
+        }
+    }, [cart, dispatch]);
+
+    const handleUpdateQty = (productId, qty) => {
+        dispatch(updateQuantity({ productId, quantity: qty }));
+    };
+
+    const handleRemove = (productId) => {
+        dispatch(removeFromCart(productId));
+    };
 
     return (
         <Drawer
@@ -59,7 +76,7 @@ const CartDrawer = ({ open, onClose }) => {
                         </Box>
                     ) : (
                         cart.map((item) => (
-                            <CartItem key={item.ProductID}>
+                            <CartItem key={item.id}>
                                 <Avatar
                                     src={item.ProductImage}
                                     variant="rounded"
@@ -70,18 +87,18 @@ const CartDrawer = ({ open, onClose }) => {
                                         <Typography variant="subtitle2" sx={{ fontWeight: 700, maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                             {item.ProductName}
                                         </Typography>
-                                        <IconButton size="small" onClick={() => removeFromCart(item.ProductID)}>
+                                        <IconButton size="small" onClick={() => handleRemove(item.id)}>
                                             <Trash2 size={16} color="#9CA3AF" />
                                         </IconButton>
                                     </Box>
                                     <Typography variant="body2" sx={{ fontWeight: 800, color: '#12B76A', mb: 1.5 }}>
-                                        ${item.Rate}
+                                        ${parseFloat(item.Rate || 0).toFixed(2)}
                                     </Typography>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                         <Stack direction="row" spacing={1.5} alignItems="center">
-                                            <QtyBtn size="small" onClick={() => updateQuantity(item.ProductID, item.quantity - 1)}><Minus size={14} /></QtyBtn>
+                                            <QtyBtn size="small" onClick={() => handleUpdateQty(item.id, item.quantity - 1)}><Minus size={14} /></QtyBtn>
                                             <Typography variant="body2" sx={{ fontWeight: 700 }}>{item.quantity}</Typography>
-                                            <QtyBtn size="small" onClick={() => updateQuantity(item.ProductID, item.quantity + 1)}><Plus size={14} /></QtyBtn>
+                                            <QtyBtn size="small" onClick={() => handleUpdateQty(item.id, item.quantity + 1)}><Plus size={14} /></QtyBtn>
                                         </Stack>
                                     </Box>
                                 </Box>

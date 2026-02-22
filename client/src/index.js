@@ -6,18 +6,26 @@ import { ThemeProvider } from 'styled-components';
 import { theme } from './theme';
 import { GlobalStyle } from './GlobalStyles';
 import { CartProvider } from './CartContext';
+import { WishlistProvider } from './WishlistContext';
+
+import { Provider } from 'react-redux';
+import { store } from './store';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   // <React.StrictMode>
-  <ThemeProvider theme={theme}>
-    <GlobalStyle />
-    <NotificationProvider>
-      <CartProvider>
-        <App />
-      </CartProvider>
-    </NotificationProvider>
-  </ThemeProvider>
+  <Provider store={store}>
+    <ThemeProvider theme={theme}>
+      <GlobalStyle />
+      <NotificationProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <App />
+          </WishlistProvider>
+        </CartProvider>
+      </NotificationProvider>
+    </ThemeProvider>
+  </Provider>
   // </React.StrictMode>
 );
 

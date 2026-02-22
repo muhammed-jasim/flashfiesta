@@ -11,7 +11,9 @@ import { ProductDetailApi, ProductDeatailsApi, CreateReviewApi } from '../Api';
 import Navigation from '../Components/Navigation';
 import DashbordCard from './DashbordCard';
 import { motion } from 'framer-motion';
-import { useCart } from '../CartContext';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../cartSlice';
+import { useWishlist } from '../WishlistContext';
 import { useNotification } from '../NotificationContext';
 
 const ImageContainer = styled(Box)`
@@ -58,7 +60,13 @@ const ProductDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const showNotification = useNotification();
-    const { addToCart } = useCart();
+    const dispatch = useDispatch();
+    const { toggleWishlist, isInWishlist } = useWishlist();
+
+    const handleAddToCart = (p) => {
+        dispatch(addToCart(p));
+        showNotification("Added to cart", "success");
+    };
 
     const [product, setProduct] = useState(null);
     const [recommendations, setRecommendations] = useState([]);
@@ -176,8 +184,8 @@ const ProductDetails = () => {
                             </UrgencyBanner>
 
                             <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mb: 4 }}>
-                                <Typography variant="h3" sx={{ fontWeight: 800, color: '#12B76A' }}>${product.Rate}</Typography>
-                                <Typography variant="h5" sx={{ color: '#9CA3AF', textDecoration: 'line-through' }}>${(product.Rate * 1.5).toFixed(2)}</Typography>
+                                <Typography variant="h3" sx={{ fontWeight: 800, color: '#12B76A' }}>${parseFloat(product.Rate).toFixed(2)}</Typography>
+                                <Typography variant="h5" sx={{ color: '#9CA3AF', textDecoration: 'line-through' }}>${(parseFloat(product.Rate || 0) * 1.5).toFixed(2)}</Typography>
                                 {product.is_trending && <Chip label="TRENDING" color="error" size="small" sx={{ fontWeight: 900 }} />}
                             </Box>
 
@@ -188,12 +196,22 @@ const ProductDetails = () => {
                             <Box sx={{ display: 'flex', gap: 2, mb: 8 }}>
                                 <Button
                                     fullWidth variant="contained" startIcon={<ShoppingBag />}
-                                    onClick={() => addToCart(product)}
+                                    onClick={() => handleAddToCart(product)}
                                     sx={{ bgcolor: '#111827', borderRadius: '16px', py: 2, fontWeight: 700, fontSize: '18px' }}
                                 >
                                     Add to Cart
                                 </Button>
-                                <IconButton sx={{ border: '2px solid #E5E7EB', borderRadius: '16px', p: 2 }}><Heart size={24} /></IconButton>
+                                <IconButton
+                                    onClick={() => toggleWishlist(product)}
+                                    sx={{
+                                        border: '2px solid #E5E7EB',
+                                        borderRadius: '16px', p: 2,
+                                        color: isInWishlist(product?.id) ? '#F43F5E' : 'inherit',
+                                        borderColor: isInWishlist(product?.id) ? '#F43F5E' : '#E5E7EB'
+                                    }}
+                                >
+                                    <Heart size={24} fill={isInWishlist(product?.id) ? '#F43F5E' : 'transparent'} />
+                                </IconButton>
                             </Box>
 
                             <Grid container spacing={3}>

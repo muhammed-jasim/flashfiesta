@@ -15,6 +15,13 @@ class UserProfile(models.Model):
     address = models.TextField(blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
     zip_code = models.CharField(max_length=20, blank=True, null=True)
+    wishlist = models.ManyToManyField('Product', blank=True, related_name='wishlisted_by')
+    
+    # Permissions for Employees (Always true for Owners)
+    can_view_stats = models.BooleanField(default=False)
+    can_manage_products = models.BooleanField(default=True)
+    can_manage_categories = models.BooleanField(default=True)
+    can_manage_orders = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user.username} - {self.role}"
@@ -87,3 +94,13 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     price = models.FloatField()
+
+class CartItem(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='cart_items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'product')

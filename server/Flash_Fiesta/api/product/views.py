@@ -1,31 +1,11 @@
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from store.models import Product, ProductImageGallery, Category, Review, OrderItem
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import ProductSerializer, CategorySerializer, ReviewSerializer
-
-
-# @api_view(["GET"])
-# def ProductView (request):
-#   productModel = ProductSerializer()
-#   ProductDetails = []
-#   if productModel:
-#     print(productModel)
-#     for i in productModel:
-#         product_detail = {
-#             'ProductName': i.ProductName,
-#             'ProductID': i.ProductID,
-#             # 'ProductImage': str(i.ProductImage) 
-#         }
-#         ProductDetails.append(product_detail)
-
-#     respoonse_data ={'Status':6000,'data' : ProductDetails}
-#   else:
-#     respoonse_data ={'Status':6001,'data' : ProductDetails}
-  
-#   return Response (respoonse_data,status=status.HTTP_200_OK)
+from django.db.models import Sum
+from store.models import Product, ProductImageGallery, Category, Review, OrderItem, Order, CartItem
+from .serializers import ProductSerializer, CategorySerializer, ReviewSerializer, CartItemSerializer
 
 @api_view(["GET"])
 def ProductView(request):
@@ -55,8 +35,9 @@ def ProductView(request):
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def Create_Product(request):
-    if request.user.profile.role not in ['OWNER', 'EMPLOYEE']:
-        return Response({'Status': 6001, 'message': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
+    profile = request.user.profile
+    if profile.role != 'OWNER' and not profile.can_manage_products:
+        return Response({'Status': 6001, 'message': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
     try:
         ProductName = request.data.get('ProductName')
         Description = request.data.get('Description', '')
@@ -87,6 +68,45 @@ def Create_Product(request):
     except Exception as e:
         return Response({'Status': 6001, 'data': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def Update_Product(request, pk):
+    profile = request.user.profile
+    if profile.role != 'OWNER' and not profile.can_manage_products:
+        return Response({'Status': 6001, 'message': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
+    try:
+        product = Product.objects.get(pk=pk)
+        data = request.data
+        product.ProductName = data.get('ProductName', product.ProductName)
+        product.ProductDescription = data.get('Description', product.ProductDescription)
+        product.ProductQuantity = data.get('Qty', product.ProductQuantity)
+        product.ProductPrice = data.get('Rate', product.ProductPrice)
+        product.category_id = data.get('category', product.category_id)
+        product.is_trending = str(data.get('is_trending')).lower() == 'true'
+        if request.FILES.get('ProductImage'):
+            product.ProductImage = request.FILES.get('ProductImage')
+        product.save()
+        return Response({'Status': 6000, 'data': 'Product updated successfully'}, status=status.HTTP_200_OK)
+    except Product.DoesNotExist:
+        return Response({'Status': 6001, 'message': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'Status': 6001, 'data': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def Delete_Product(request, pk):
+    profile = request.user.profile
+    if profile.role != 'OWNER' and not profile.can_manage_products:
+        return Response({'Status': 6001, 'message': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
+    try:
+        product = Product.objects.get(pk=pk)
+        product.delete()
+        return Response({'Status': 6000, 'data': 'Product deleted'}, status=status.HTTP_200_OK)
+    except Product.DoesNotExist:
+        return Response({'Status': 6001, 'message': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+
 @api_view(["GET"])
 def ProductDetailView(request, pk):
     try:
@@ -104,12 +124,13 @@ def ProductDetailView(request, pk):
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def Dashboard_Stats(request):
-    if request.user.profile.role != 'OWNER':
-        return Response({'Status': 6001, 'message': 'Owner only'}, status=status.HTTP_403_FORBIDDEN)
+    profile = request.user.profile
+    if profile.role != 'OWNER' and not profile.can_view_stats:
+        return Response({'Status': 6001, 'message': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
     
     total_products = Product.objects.count()
     total_orders = Order.objects.count()
-    total_revenue = sum(o.total_amount for o in Order.objects.all())
+    total_revenue = Order.objects.aggregate(total=Sum('total_amount'))['total'] or 0
     
     data = {
         'total_products': total_products,
@@ -128,8 +149,9 @@ def List_Categories(request):
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def Create_Category(request):
-    if request.user.profile.role not in ['OWNER', 'EMPLOYEE']:
-        return Response({'Status': 6001, 'message': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
+    profile = request.user.profile
+    if profile.role != 'OWNER' and not profile.can_manage_categories:
+        return Response({'Status': 6001, 'message': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
     try:
         name = request.data.get('name')
         image = request.FILES.get('image')
@@ -173,3 +195,91 @@ def Create_Review(request):
         return Response({'Status': 6001, 'data': 'Product ID required'}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'Status': 6001, 'data': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def Toggle_Wishlist(request):
+    try:
+        product_id = request.data.get('product_id')
+        if not product_id:
+            return Response({'Status': 6001, 'message': 'Product ID required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        product = Product.objects.get(id=product_id)
+        profile = request.user.profile
+        
+        if product in profile.wishlist.all():
+            profile.wishlist.remove(product)
+            return Response({'Status': 6000, 'message': 'Removed from wishlist', 'wishlisted': False}, status=status.HTTP_200_OK)
+        else:
+            profile.wishlist.add(product)
+            return Response({'Status': 6000, 'message': 'Added to wishlist', 'wishlisted': True}, status=status.HTTP_200_OK)
+            
+    except Product.DoesNotExist:
+        return Response({'Status': 6001, 'message': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'Status': 6001, 'data': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["GET"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def List_Wishlist(request):
+    try:
+        wishlist = request.user.profile.wishlist.all()
+        serializer = ProductSerializer(wishlist, many=True, context={'request': request})
+        return Response({'Status': 6000, 'data': serializer.data}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'Status': 6001, 'data': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["GET"])
+def Search_Suggestions(request):
+    query = request.GET.get('q', '')
+    if len(query) < 2:
+        return Response({'Status': 6000, 'data': []})
+    
+    suggestions = Product.objects.filter(ProductName__icontains=query).values_list('ProductName', flat=True).distinct()[:5]
+            
+    return Response({'Status': 6000, 'data': list(suggestions)}, status=status.HTTP_200_OK)
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def Sync_Cart(request):
+    try:
+        items = request.data.get('items', [])
+        # Clear existing and replace with new state (simplest for sync)
+        CartItem.objects.filter(user=request.user).delete()
+        
+        for item in items:
+            CartItem.objects.create(
+                user=request.user,
+                product_id=item['id'],
+                quantity=item['quantity']
+            )
+        return Response({'Status': 6000, 'message': 'Cart synced'}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'Status': 6001, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["GET"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def Get_Cart(request):
+    try:
+        cart_items = CartItem.objects.filter(user=request.user)
+        serializer = CartItemSerializer(cart_items, many=True, context={'request': request})
+        
+        # Transform to frontend format
+        formatted_data = []
+        for item in serializer.data:
+            p = item['product_details']
+            formatted_data.append({
+                'id': p['id'],
+                'ProductName': p['ProductName'],
+                'ProductImage': p['ProductImage'],
+                'Rate': p['Rate'],
+                'quantity': item['quantity']
+            })
+            
+        return Response({'Status': 6000, 'data': formatted_data}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'Status': 6001, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)

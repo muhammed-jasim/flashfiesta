@@ -14,12 +14,14 @@ import Checkout from "./Pages/Checkout.js";
 import Orders from "./Pages/Orders.js";
 
 import Profile from "./Pages/Profile.js";
+import Wishlist from "./Pages/Wishlist.js";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
         <Route path="checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
         <Route path="orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
         <Route path="product/:id" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>} />

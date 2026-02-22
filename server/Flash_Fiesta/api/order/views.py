@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from store.models import Order, OrderItem, Product
 from .serializers import OrderSerializer
 from django.db import transaction
+from django.db.models import Sum
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -12,30 +13,29 @@ def place_order(request):
     data = request.data
     user = request.user
     
+    items = data.get('items', [])
+    if not items:
+        return Response({'Status': 6001, 'message': 'No items in order'}, status=status.HTTP_400_BAD_REQUEST)
+
     try:
         with transaction.atomic():
-            # Create Order (initially without total if not provided, we will update it)
-            total_amount = data.get('total_amount')
+            # Create the order object first
             order = Order.objects.create(
                 user=user,
                 full_name=data.get('full_name'),
                 address=data.get('address'),
                 city=data.get('city'),
                 zip_code=data.get('zip_code'),
-                total_amount=total_amount if total_amount is not None else 0
+                total_amount=0 # Placeholder
             )
-            
-            # Create Order Items
-            items = data.get('items', [])
+
             calculated_total = 0
             for item in items:
-                # Use UUID 'id' for reliable unique lookup
                 product_id = item.get('product_id')
                 product = Product.objects.get(id=product_id)
                 
-                qty = item.get('quantity', 1)
-                item_price = product.ProductPrice or 0
-                calculated_total += (item_price * qty)
+                qty = int(item.get('quantity', 1))
+                item_price = float(product.ProductPrice or 0)
                 
                 OrderItem.objects.create(
                     order=order,
@@ -44,20 +44,20 @@ def place_order(request):
                     price=item_price
                 )
                 
-                # Update Inventory
-                if product.ProductQuantity:
-                    product.ProductQuantity -= qty
-                    product.save()
-            
-            # Update total if it was missing
-            if total_amount is None:
-                order.total_amount = calculated_total
-                order.save()
-            
+                # Update stock
+                product.ProductQuantity -= qty
+                product.save()
+                
+                calculated_total += (item_price * qty)
+
+            # Use the calculated total explicitly
+            order.total_amount = calculated_total
+            order.save()
+
             return Response({
                 'Status': 6000,
                 'message': 'Order placed successfully',
-                'order_id': str(order.id)
+                'order_id': order.id
             }, status=status.HTTP_201_CREATED)
             
     except Product.DoesNotExist:
@@ -68,7 +68,7 @@ def place_order(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_orders(request):
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    orders = Order.objects.filter(user=request.user).prefetch_related('items', 'items__product').order_by('-created_at')
     serializer = OrderSerializer(orders, many=True)
     return Response({
         'Status': 6000,
@@ -78,26 +78,36 @@ def get_user_orders(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_dashboard_stats(request):
-    # Only for staff/superuser usually, but for this demo we'll allow authenticated
+    profile = request.user.profile
+    if profile.role != 'OWNER' and not profile.can_view_stats:
+        return Response({'Status': 6001, 'message': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
+        
     total_orders = Order.objects.count()
-    total_revenue = sum(Order.objects.values_list('total_amount', flat=True))
+    total_revenue = Order.objects.aggregate(total=Sum('total_amount'))['total'] or 0
     total_products = Product.objects.count()
     
-    # Simple sales by day (last 7 days)
-    # In a real app we'd use aggregation, here we'll mock some if empty or use real if exists
+    # Real sales by day for the last 7 days
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    recent_sales = []
+    today = timezone.now().date()
+    for i in range(6, -1, -1):
+        day = today - timedelta(days=i)
+        day_orders = Order.objects.filter(created_at__date=day)
+        revenue = day_orders.aggregate(total=Sum('total_amount'))['total'] or 0
+        sales_count = day_orders.count()
+        recent_sales.append({
+            'name': day.strftime('%a'),
+            'sales': sales_count,
+            'revenue': float(revenue)
+        })
+    
     stats = {
         'total_orders': total_orders,
-        'total_revenue': total_revenue,
+        'total_revenue': float(total_revenue),
         'total_products': total_products,
-        'recent_sales': [
-            {'name': 'Mon', 'sales': 4000, 'revenue': 2400},
-            {'name': 'Tue', 'sales': 3200, 'revenue': 1800},
-            {'name': 'Wed', 'sales': 5100, 'revenue': 4200},
-            {'name': 'Thu', 'sales': 2800, 'revenue': 2100},
-            {'name': 'Fri', 'sales': 6200, 'revenue': 5500},
-            {'name': 'Sat', 'sales': 4300, 'revenue': 3800},
-            {'name': 'Sun', 'sales': 3900, 'revenue': 3100}
-        ]
+        'recent_sales': recent_sales
     }
     
     return Response({
@@ -108,9 +118,10 @@ def get_dashboard_stats(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_all_orders(request):
-    if request.user.profile.role != 'OWNER':
-        return Response({'Status': 6001, 'message': 'Owner only'}, status=status.HTTP_403_FORBIDDEN)
-    orders = Order.objects.all().order_by('-created_at')
+    profile = request.user.profile
+    if profile.role != 'OWNER' and not profile.can_manage_orders:
+        return Response({'Status': 6001, 'message': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
+    orders = Order.objects.all().prefetch_related('items', 'items__product').order_by('-created_at')
     serializer = OrderSerializer(orders, many=True)
     return Response({
         'Status': 6000,
@@ -120,8 +131,9 @@ def get_all_orders(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def update_order_status(request, pk):
-    if request.user.profile.role != 'OWNER':
-        return Response({'Status': 6001, 'message': 'Owner only'}, status=status.HTTP_403_FORBIDDEN)
+    profile = request.user.profile
+    if profile.role != 'OWNER' and not profile.can_manage_orders:
+        return Response({'Status': 6001, 'message': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
     try:
         order = Order.objects.get(pk=pk)
         new_status = request.data.get('status')
@@ -136,10 +148,11 @@ def update_order_status(request, pk):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_order_detail(request, pk):
-    if request.user.profile.role != 'OWNER':
-        return Response({'Status': 6001, 'message': 'Owner only'}, status=status.HTTP_403_FORBIDDEN)
+    profile = request.user.profile
+    if profile.role != 'OWNER' and not profile.can_manage_orders:
+        return Response({'Status': 6001, 'message': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
     try:
-        order = Order.objects.get(pk=pk)
+        order = Order.objects.prefetch_related('items', 'items__product').get(pk=pk)
         serializer = OrderSerializer(order)
         return Response({'Status': 6000, 'data': serializer.data}, status=status.HTTP_200_OK)
     except Order.DoesNotExist:
