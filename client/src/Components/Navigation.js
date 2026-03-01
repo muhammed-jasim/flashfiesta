@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
 import { AppBar, Toolbar, IconButton, Badge, MenuItem, Menu, Box, InputBase, Container, Typography, Avatar } from '@mui/material';
-import { Search, Heart, ShoppingBag, User, LogOut } from 'lucide-react';
+import { Search, Heart, ShoppingBag, User, LogOut, Zap } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../CartContext';
 import { useWishlist } from '../WishlistContext';
@@ -12,27 +12,28 @@ import { useSelector, useDispatch } from 'react-redux';
 import { selectCartCount, fetchCart, syncCartToBackend, clearCart } from '../cartSlice';
 
 const NavContainer = styled(AppBar)(({ theme }) => ({
-  backgroundColor: '#FFFFFF',
-  color: '#111827',
+  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  backdropFilter: 'blur(10px)',
+  color: '#020617',
   boxShadow: 'none',
-  borderBottom: '1px solid #E5E7EB',
-  height: '72px',
+  borderBottom: '1px solid #F1F5F9',
+  height: '64px',
   justifyContent: 'center',
+  zIndex: 1100,
 }));
 
 const LogoLink = styled(Link)`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   text-decoration: none;
-  font-weight: 800;
+  font-weight: 950;
   font-size: 20px;
-  color: #111827;
-  letter-spacing: -0.5px;
+  color: #020617;
+  letter-spacing: -1px;
 
-  img {
-    height: 32px;
-    width: auto;
+  span {
+    color: #0066FF;
   }
 `;
 
@@ -77,19 +78,25 @@ const NavItem = styled(Link)`
 
 const SearchWrapper = styled('div')(({ theme }) => ({
   position: 'relative',
-  borderRadius: '12px',
-  backgroundColor: '#F3F4F6',
-  transition: 'all 0.2s ease',
-  marginRight: '16px',
-  marginLeft: '16px',
-  width: '320px',
+  borderRadius: '100px',
+  backgroundColor: '#F1F5F9',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  marginRight: '24px',
+  marginLeft: '24px',
+  width: '450px',
   display: 'flex',
   alignItems: 'center',
-  padding: '4px 12px',
+  padding: '6px 16px',
+  border: '1px solid transparent',
 
   '&:focus-within': {
     backgroundColor: '#FFFFFF',
-    boxShadow: '0 0 0 2px #12B76A',
+    borderColor: '#0066FF',
+    boxShadow: '0 0 0 4px rgba(0, 102, 255, 0.1)',
+  },
+
+  '@media (max-width: 1024px)': {
+    width: '300px',
   },
 
   '@media (max-width: 768px)': {
@@ -100,6 +107,7 @@ const SearchWrapper = styled('div')(({ theme }) => ({
 const IconBtn = styled(IconButton)`
   color: #4B5563;
   transition: all 0.2s ease;
+  padding: 8px;
   
   &:hover {
     color: #12B76A;
@@ -227,7 +235,8 @@ export default function Navigation() {
       <Container maxWidth="xl">
         <Toolbar sx={{ px: '0 !important' }}>
           <LogoLink to="/dashboard">
-            <span style={{ color: '#12B76A' }}>FLASH</span> FIESTA
+            <Zap size={24} fill="#0066FF" color="#0066FF" />
+            <span>FLASH</span>FIESTA
           </LogoLink>
 
           <NavLinks>

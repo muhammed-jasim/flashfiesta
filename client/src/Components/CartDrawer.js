@@ -7,9 +7,9 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 
 const CartItem = styled(Box)`
-  padding: 20px;
+  padding: 15px;
   display: flex;
-  gap: 16px;
+  gap: 12px;
   border-bottom: 1px solid #F3F4F6;
 `;
 
@@ -44,7 +44,7 @@ const CartDrawer = ({ open, onClose }) => {
             anchor="right"
             open={open}
             onClose={onClose}
-            PaperProps={{ sx: { width: { xs: '100%', sm: 400 }, borderTopLeftRadius: '24px', borderBottomLeftRadius: '24px' } }}
+            PaperProps={{ sx: { width: { xs: '100%', sm: 360 }, borderTopLeftRadius: '24px', borderBottomLeftRadius: '24px' } }}
         >
             <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <Box sx={{ p: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #F3F4F6' }}>
@@ -80,7 +80,7 @@ const CartDrawer = ({ open, onClose }) => {
                                 <Avatar
                                     src={item.ProductImage}
                                     variant="rounded"
-                                    sx={{ width: 80, height: 80, backgroundColor: '#F9FAFB' }}
+                                    sx={{ width: 64, height: 64, backgroundColor: '#F9FAFB' }}
                                 />
                                 <Box sx={{ flexGrow: 1 }}>
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
@@ -111,7 +111,7 @@ const CartDrawer = ({ open, onClose }) => {
                     <Box sx={{ p: 4, borderTop: '1px solid #F3F4F6' }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
                             <Typography sx={{ color: '#6B7280', fontWeight: 600 }}>Subtotal</Typography>
-                            <Typography sx={{ fontWeight: 800, fontSize: '20px' }}>${cartTotal.toFixed(2)}</Typography>
+                            <Typography sx={{ fontWeight: 800, fontSize: '18px' }}>${cartTotal.toFixed(2)}</Typography>
                         </Box>
                         <Button
                             fullWidth
@@ -120,9 +120,9 @@ const CartDrawer = ({ open, onClose }) => {
                             sx={{
                                 backgroundColor: '#12B76A',
                                 '&:hover': { backgroundColor: '#0BA05B' },
-                                borderRadius: '16px',
-                                py: 2,
-                                fontSize: '16px',
+                                borderRadius: '12px',
+                                py: 1.5,
+                                fontSize: '15px',
                                 fontWeight: 700,
                                 textTransform: 'none',
                                 display: 'flex',

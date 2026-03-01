@@ -48,6 +48,11 @@ def Create_Product(request):
         category_id = request.data.get('category')
         is_trending = request.data.get('is_trending') == 'true'
 
+        if category_id and category_id != '' and category_id != 'null':
+            id_cat = category_id
+        else:
+            id_cat = None
+
         if ProductName:
             product = Product.objects.create(
                 ProductName=ProductName,
@@ -55,7 +60,7 @@ def Create_Product(request):
                 ProductImage=ProductImage,
                 ProductQuantity=Qty,
                 ProductPrice=Rate,
-                category_id=category_id,
+                category_id=id_cat,
                 is_trending=is_trending
             )
             
@@ -82,11 +87,23 @@ def Update_Product(request, pk):
         product.ProductDescription = data.get('Description', product.ProductDescription)
         product.ProductQuantity = data.get('Qty', product.ProductQuantity)
         product.ProductPrice = data.get('Rate', product.ProductPrice)
-        product.category_id = data.get('category', product.category_id)
+        
+        category_id = data.get('category')
+        if category_id and category_id != '' and category_id != 'null':
+            product.category_id = category_id
+        elif category_id == '' or category_id == 'null':
+            product.category_id = None
+
         product.is_trending = str(data.get('is_trending')).lower() == 'true'
         if request.FILES.get('ProductImage'):
             product.ProductImage = request.FILES.get('ProductImage')
         product.save()
+
+        # Handle Gallery Update
+        gallery_images = request.FILES.getlist('gallery_images')
+        for img in gallery_images:
+            ProductImageGallery.objects.create(product=product, image=img)
+
         return Response({'Status': 6000, 'data': 'Product updated successfully'}, status=status.HTTP_200_OK)
     except Product.DoesNotExist:
         return Response({'Status': 6001, 'message': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -161,6 +178,44 @@ def Create_Category(request):
         return Response({'Status': 6001, 'data': 'Name required'}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'Status': 6001, 'data': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def Update_Category(request, pk):
+    profile = request.user.profile
+    if profile.role != 'OWNER' and not profile.can_manage_categories:
+        return Response({'Status': 6001, 'message': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
+    try:
+        category = Category.objects.get(pk=pk)
+        name = request.data.get('name')
+        image = request.FILES.get('image')
+        
+        if name:
+            category.name = name
+        if image:
+            category.image = image
+        category.save()
+        
+        return Response({'Status': 6000, 'data': 'Category updated'}, status=status.HTTP_200_OK)
+    except Category.DoesNotExist:
+        return Response({'Status': 6001, 'message': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'Status': 6001, 'data': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def Delete_Category(request, pk):
+    profile = request.user.profile
+    if profile.role != 'OWNER' and not profile.can_manage_categories:
+        return Response({'Status': 6001, 'message': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
+    try:
+        category = Category.objects.get(pk=pk)
+        category.delete()
+        return Response({'Status': 6000, 'data': 'Category deleted'}, status=status.HTTP_200_OK)
+    except Category.DoesNotExist:
+        return Response({'Status': 6001, 'message': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(["POST"])
 @authentication_classes([JWTAuthentication])

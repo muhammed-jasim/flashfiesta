@@ -13,6 +13,8 @@ urlpatterns = [
     path('Wishlist/', views.List_Wishlist, name='ListWishlist'),
     path('UpdateProduct/<uuid:pk>/', views.Update_Product, name='UpdateProduct'),
     path('DeleteProduct/<uuid:pk>/', views.Delete_Product, name='DeleteProduct'),
+    path('UpdateCategory/<uuid:pk>/', views.Update_Category, name='UpdateCategory'),
+    path('DeleteCategory/<uuid:pk>/', views.Delete_Category, name='DeleteCategory'),
     path('Cart/Sync/', views.Sync_Cart, name='SyncCart'),
     path('Cart/', views.Get_Cart, name='GetCart'),
 ]

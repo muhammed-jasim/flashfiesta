@@ -25,5 +25,9 @@ export const UpdateOrderStatusApi = (id) => `${BASE_URL}/api/order/update-status
 export const OrderDetailApi = (id) => `${BASE_URL}/api/order/detail/${id}/`;
 export const SyncCartApi = `${BASE_URL}/api/product/Cart/Sync/`;
 export const GetCartApi = `${BASE_URL}/api/product/Cart/`;
+export const UpdateProductApi = (id) => `${BASE_URL}/api/product/UpdateProduct/${id}/`;
+export const DeleteProductApi = (id) => `${BASE_URL}/api/product/DeleteProduct/${id}/`;
+export const UpdateCategoryApi = (id) => `${BASE_URL}/api/product/UpdateCategory/${id}/`;
+export const DeleteCategoryApi = (id) => `${BASE_URL}/api/product/DeleteCategory/${id}/`;
 export const ListEmployeesApi = `${BASE_URL}/api/auth/employees/`;
 export const UpdateEmployeePermissionsApi = (id) => `${BASE_URL}/api/auth/employees/update-permissions/${id}/`;

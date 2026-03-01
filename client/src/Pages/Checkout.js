@@ -128,7 +128,7 @@ const Checkout = () => {
                 </Grid>
             </Grid>
             <Grid item xs={12} md={5}>
-                <Paper sx={{ p: 4, borderRadius: '24px', backgroundColor: '#F9FAFB', border: '1px solid #F3F4F6', boxShadow: 'none' }}>
+                <Paper sx={{ p: 3, borderRadius: '20px', backgroundColor: '#F9FAFB', border: '1px solid #F3F4F6', boxShadow: 'none' }}>
                     <Typography variant="h6" sx={{ fontWeight: 800, mb: 3 }}>Summary</Typography>
                     {cart.map(item => (
                         <CheckoutItem key={item.id}>
@@ -229,15 +229,15 @@ const Checkout = () => {
     return (
         <Box sx={{ backgroundColor: '#FFFFFF', minHeight: '100vh' }}>
             <Navigation />
-            <Container maxWidth="lg" sx={{ py: 10 }}>
+            <Container maxWidth="lg" sx={{ py: 6 }}>
                 {activeStep < steps.length ? (
                     <>
-                        <Box sx={{ mb: 8, textAlign: 'center' }}>
-                            <Typography variant="h3" sx={{ fontWeight: 800, mb: 2 }}>Checkout</Typography>
-                            <Typography sx={{ color: '#6B7280' }}>Complete your purchase in 3 easy steps</Typography>
+                        <Box sx={{ mb: 6, textAlign: 'center' }}>
+                            <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>Checkout</Typography>
+                            <Typography variant="body2" sx={{ color: '#6B7280' }}>Complete your purchase in 3 easy steps</Typography>
                         </Box>
 
-                        <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 10, '& .MuiStepIcon-root.Mui-active': { color: '#12B76A' }, '& .MuiStepIcon-root.Mui-completed': { color: '#12B76A' } }}>
+                        <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 6, '& .MuiStepIcon-root.Mui-active': { color: '#12B76A' }, '& .MuiStepIcon-root.Mui-completed': { color: '#12B76A' } }}>
                             {steps.map((label) => (
                                 <Step key={label}><StepLabel>{label}</StepLabel></Step>
                             ))}
