@@ -12,8 +12,8 @@ import html2canvas from 'html2canvas';
 import EinvoiceTemplate from './Printtemplate';
 
 const OrderCard = styled(Paper)`
-  padding: 24px;
-  border-radius: 20px;
+  padding: 20px;
+  border-radius: 16px;
   border: 1px solid #E5E7EB;
   box-shadow: none;
   margin-bottom: 24px;
@@ -42,7 +42,7 @@ const ModalContent = styled(Paper)`
   max-height: 90vh;
   overflow-y: auto;
   border-radius: 24px;
-  padding: 32px;
+  padding: 24px;
   outline: none;
 `;
 
@@ -122,9 +122,9 @@ const Orders = () => {
     return (
         <Box sx={{ backgroundColor: '#FFFFFF', minHeight: '100vh' }}>
             <Navigation />
-            <Container maxWidth="lg" sx={{ py: 8 }}>
-                <Box sx={{ mb: 6 }}>
-                    <Typography variant="h3" sx={{ fontWeight: 800, mb: 1 }}>My Orders</Typography>
+            <Container maxWidth="lg" sx={{ py: 6 }}>
+                <Box sx={{ mb: 4 }}>
+                    <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>My Orders</Typography>
                     <Typography sx={{ color: '#6B7280' }}>Track and manage your limited flash purchases.</Typography>
                 </Box>
 
@@ -209,8 +209,8 @@ const Orders = () => {
             {/* Order Detail Modal */}
             <Modal open={modalOpen} onClose={handleCloseModal}>
                 <ModalContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-                        <Typography variant="h4" sx={{ fontWeight: 800 }}>Order Summary</Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                        <Typography variant="h5" sx={{ fontWeight: 800 }}>Order Summary</Typography>
                         <IconButton onClick={handleCloseModal}><X /></IconButton>
                     </Box>
 

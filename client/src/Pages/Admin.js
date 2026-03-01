@@ -23,7 +23,8 @@ import {
   CreteProduct, DashboardStatsApi, GetAllOrdersApi,
   UpdateOrderStatusApi, ProductDeatailsApi, CategoriesApi,
   CreateCategoryApi, OrderDetailApi, ProfileApi, ListEmployeesApi,
-  UpdateEmployeePermissionsApi
+  UpdateEmployeePermissionsApi, UpdateProductApi, DeleteProductApi,
+  UpdateCategoryApi, DeleteCategoryApi
 } from '../Api';
 import { Users, Settings, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -39,10 +40,10 @@ const AdminWrapper = styled(Box)`
 `;
 
 const Sidebar = styled(Box)`
-  width: 280px;
+  width: 240px;
   background: white;
   border-right: 1px solid #E5E7EB;
-  padding: 24px;
+  padding: 20px;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -63,7 +64,7 @@ const NavItem = styled(ListItem)`
 `;
 
 const StatCard = styled(Paper)`
-  padding: 24px;
+  padding: 20px;
   border-radius: 20px;
   border: 1px solid #E5E7EB;
   box-shadow: none;
@@ -78,7 +79,7 @@ const ModalBox = styled(Box)`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 700px;
+  width: 600px;
   background-color: white;
   border-radius: 24px;
   box-shadow: 24;
@@ -154,6 +155,10 @@ const Admin = () => {
   const [openProductModal, setOpenProductModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
+
+  const [isCatEditing, setIsCatEditing] = useState(false);
+  const [editingCatId, setEditingCatId] = useState(null);
+
   const [reportType, setReportType] = useState('sales');
   const componentRef = React.useRef();
 
@@ -380,7 +385,6 @@ const Admin = () => {
 
     try {
       let response;
-      const { UpdateProductApi, CreteProduct } = await import('../Api');
       if (isEditing) {
         response = await axios.post(UpdateProductApi(editingId), formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
@@ -402,6 +406,16 @@ const Admin = () => {
     }
   };
 
+  const handleCatEditClick = (cat) => {
+    setIsCatEditing(true);
+    setEditingCatId(cat.id);
+    setCatState({
+      name: cat.name,
+      image: null,
+      preview: cat.image
+    });
+  };
+
   const AddCategory = async () => {
     if (!catState.name) return;
     const formData = new FormData();
@@ -409,16 +423,26 @@ const Admin = () => {
     if (catState.image) formData.append('image', catState.image);
 
     try {
-      const response = await axios.post(CreateCategoryApi, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      let response;
+      if (isCatEditing) {
+        response = await axios.post(UpdateCategoryApi(editingCatId), formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      } else {
+        response = await axios.post(CreateCategoryApi, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      }
+
       if (response.data.Status === 6000) {
-        showNotification("Category created", "success");
+        showNotification(isCatEditing ? "Category updated" : "Category created", "success");
         setCatState({ name: '', image: null, preview: null });
+        setIsCatEditing(false);
+        setEditingCatId(null);
         fetchData();
       }
     } catch (error) {
-      showNotification("Failed to add category", "error");
+      showNotification(`Failed to ${isCatEditing ? 'update' : 'add'} category`, "error");
     }
   };
 
@@ -600,11 +624,13 @@ const Admin = () => {
                 <IconButton size="small" color="error" onClick={async () => {
                   if (window.confirm("Delete this product?")) {
                     try {
-                      const { DeleteProductApi } = await import('../Api');
                       await axios.post(DeleteProductApi(p.id));
                       showNotification("Product deleted", "success");
                       fetchData();
-                    } catch (e) { showNotification("Delete failed", "error"); }
+                    } catch (e) {
+                      console.error("Delete failed", e);
+                      showNotification("Delete failed", "error");
+                    }
                   }
                 }}><X size={18} /></IconButton>
               </TableCell>
@@ -612,35 +638,72 @@ const Admin = () => {
           ))}
         </TableBody>
       </Table>
-    </TableContainer>
+    </TableContainer >
   );
 
   const renderCategories = () => (
     <Grid container spacing={3}>
       <Grid item xs={12} md={4}>
         <StatCard>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>Add Category</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>{isCatEditing ? 'Edit Category' : 'Add Category'}</Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <TextField fullWidth label="Category Name" value={catState.name} onChange={(e) => setCatState({ ...catState, name: e.target.value })} />
             <Button component="label" variant="outlined" startIcon={<ImageIcon size={18} />} sx={{ borderRadius: '12px' }}>
-              Upload Image
+              {catState.image ? 'Change Image' : 'Upload Image'}
               <input type="file" hidden accept="image/*" onChange={(e) => setCatState({ ...catState, image: e.target.files[0], preview: URL.createObjectURL(e.target.files[0]) })} />
             </Button>
-            {catState.preview && <Avatar src={catState.preview} variant="rounded" sx={{ width: '100%', height: 120 }} />}
-            <Button variant="contained" fullWidth onClick={AddCategory} sx={{ bgcolor: '#12B76A' }}>Create Category</Button>
+            {catState.preview && (
+              <Box sx={{ position: 'relative' }}>
+                <Avatar src={catState.preview} variant="rounded" sx={{ width: '100%', height: 120 }} />
+                <IconButton
+                  size="small"
+                  sx={{ position: 'absolute', top: 5, right: 5, bgcolor: 'rgba(255,255,255,0.7)' }}
+                  onClick={() => setCatState({ ...catState, image: null, preview: null })}
+                >
+                  <X size={14} />
+                </IconButton>
+              </Box>
+            )}
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button variant="contained" fullWidth onClick={AddCategory} sx={{ bgcolor: '#12B76A', borderRadius: '12px' }}>
+                {isCatEditing ? 'Update' : 'Create'}
+              </Button>
+              {isCatEditing && (
+                <Button variant="outlined" fullWidth onClick={() => { setIsCatEditing(false); setEditingCatId(null); setCatState({ name: '', image: null, preview: null }); }} sx={{ borderRadius: '12px' }}>
+                  Cancel
+                </Button>
+              )}
+            </Box>
           </Box>
         </StatCard>
       </Grid>
       <Grid item xs={12} md={8}>
         <TableContainer component={Paper} sx={{ borderRadius: '24px', border: '1px solid #E5E7EB', boxShadow: 'none' }}>
           <Table>
-            <TableHead sx={{ bgcolor: '#F9FAFB' }}><TableRow><TableCell>Image</TableCell><TableCell>Name</TableCell><TableCell>Products</TableCell></TableRow></TableHead>
+            <TableHead sx={{ bgcolor: '#F9FAFB' }}>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 700 }}>Image</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Action</TableCell>
+              </TableRow>
+            </TableHead>
             <TableBody>
               {categories.map(c => (
                 <TableRow key={c.id}>
                   <TableCell><Avatar src={c.image} variant="rounded" /></TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>{c.name}</TableCell>
-                  <TableCell>Click to View</TableCell>
+                  <TableCell>
+                    <IconButton size="small" sx={{ color: '#12B76A' }} onClick={() => handleCatEditClick(c)}><FileText size={18} /></IconButton>
+                    <IconButton size="small" color="error" onClick={async () => {
+                      if (window.confirm("Delete this category?")) {
+                        try {
+                          await axios.post(DeleteCategoryApi(c.id));
+                          showNotification("Category deleted", "success");
+                          fetchData();
+                        } catch (e) { showNotification("Delete failed", "error"); }
+                      }
+                    }}><X size={18} /></IconButton>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -889,7 +952,7 @@ const Admin = () => {
         </NavItem>
       </Sidebar>
 
-      <Box sx={{ flexGrow: 1, p: 4 }}>
+      <Box sx={{ flexGrow: 1, p: 3 }}>
         <SubHeader>
           <Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 0.5 }}>
@@ -928,8 +991,8 @@ const Admin = () => {
 
         <Modal open={orderModalOpen} onClose={() => setOrderModalOpen(false)}>
           <ModalBox>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-              <Typography variant="h5" sx={{ fontWeight: 800 }}>Order Details #{selectedOrder?.id.slice(0, 8)}</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 800 }}>Order Details #{selectedOrder?.id.slice(0, 8)}</Typography>
               <IconButton onClick={() => setOrderModalOpen(false)}><X /></IconButton>
             </Box>
             <Divider sx={{ mb: 3 }} />

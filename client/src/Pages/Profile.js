@@ -11,25 +11,25 @@ import { motion } from 'framer-motion';
 
 const ProfileHero = styled(Box)`
   background: linear-gradient(135deg, #12B76A 0%, #0BA05B 100%);
-  height: 200px;
+  height: 160px;
   width: 100%;
   position: relative;
-  margin-bottom: 80px;
+  margin-bottom: 60px;
 `;
 
 const AvatarWrapper = styled(Box)`
   position: absolute;
-  bottom: -60px;
+  bottom: -50px;
   left: 40px;
   background: white;
-  padding: 6px;
+  padding: 5px;
   border-radius: 50%;
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 `;
 
 const ProfileCard = styled(Paper)`
-  padding: 40px;
-  border-radius: 24px;
+  padding: 24px;
+  border-radius: 20px;
   border: 1px solid #E5E7EB;
   box-shadow: none;
 `;
@@ -97,7 +97,7 @@ const Profile = () => {
                     </IconButton>
                     <AvatarWrapper>
                         <Avatar
-                            sx={{ width: 120, height: 120, bgcolor: '#12B76A', fontSize: '48px', fontWeight: 800 }}
+                            sx={{ width: 100, height: 100, bgcolor: '#12B76A', fontSize: '40px', fontWeight: 800 }}
                         >
                             {profile.username[0]?.toUpperCase()}
                         </Avatar>
@@ -111,8 +111,8 @@ const Profile = () => {
             <Container maxWidth="lg" sx={{ pb: 10 }}>
                 <Grid container spacing={4}>
                     <Grid item xs={12} md={4}>
-                        <Box sx={{ mb: 4 }}>
-                            <Typography variant="h4" sx={{ fontWeight: 900, mb: 1 }}>{profile.username}</Typography>
+                        <Box sx={{ mb: 3 }}>
+                            <Typography variant="h5" sx={{ fontWeight: 900, mb: 1 }}>{profile.username}</Typography>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Typography variant="body2" sx={{ color: '#6B7280', fontWeight: 600 }}>{profile.email}</Typography>
                                 <Divider orientation="vertical" flexItem sx={{ height: 12, my: 'auto' }} />

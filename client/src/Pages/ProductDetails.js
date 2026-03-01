@@ -23,7 +23,7 @@ const ImageContainer = styled(Box)`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 30px;
   aspect-ratio: 1;
 
   img {
@@ -135,8 +135,8 @@ const ProductDetails = () => {
         <Box sx={{ backgroundColor: '#FFFFFF', minHeight: '100vh' }}>
             <Navigation />
 
-            <Container maxWidth="xl" sx={{ py: 8 }}>
-                <Grid container spacing={8}>
+            <Container maxWidth="xl" sx={{ py: 6 }}>
+                <Grid container spacing={6}>
                     <Grid item xs={12} md={6}>
                         <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }}>
                             <ImageContainer>
@@ -172,7 +172,7 @@ const ProductDetails = () => {
                                 </Box>
                             </Box>
 
-                            <Typography variant="h2" sx={{ fontWeight: 800, mb: 2, fontSize: { xs: '32px', md: '48px' }, lineHeight: 1.2 }}>
+                            <Typography variant="h2" sx={{ fontWeight: 800, mb: 1, fontSize: { xs: '28px', md: '36px' }, lineHeight: 1.2 }}>
                                 {product.ProductName}
                             </Typography>
 
@@ -183,9 +183,9 @@ const ProductDetails = () => {
                                 </Typography>
                             </UrgencyBanner>
 
-                            <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mb: 4 }}>
-                                <Typography variant="h3" sx={{ fontWeight: 800, color: '#12B76A' }}>${parseFloat(product.Rate).toFixed(2)}</Typography>
-                                <Typography variant="h5" sx={{ color: '#9CA3AF', textDecoration: 'line-through' }}>${(parseFloat(product.Rate || 0) * 1.5).toFixed(2)}</Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mb: 3 }}>
+                                <Typography variant="h4" sx={{ fontWeight: 800, color: '#12B76A' }}>${parseFloat(product.Rate).toFixed(2)}</Typography>
+                                <Typography variant="h6" sx={{ color: '#9CA3AF', textDecoration: 'line-through' }}>${(parseFloat(product.Rate || 0) * 1.5).toFixed(2)}</Typography>
                                 {product.is_trending && <Chip label="TRENDING" color="error" size="small" sx={{ fontWeight: 900 }} />}
                             </Box>
 
@@ -197,15 +197,15 @@ const ProductDetails = () => {
                                 <Button
                                     fullWidth variant="contained" startIcon={<ShoppingBag />}
                                     onClick={() => handleAddToCart(product)}
-                                    sx={{ bgcolor: '#111827', borderRadius: '16px', py: 2, fontWeight: 700, fontSize: '18px' }}
+                                    sx={{ bgcolor: '#111827', borderRadius: '12px', py: 1.5, fontWeight: 700, fontSize: '16px' }}
                                 >
                                     Add to Cart
                                 </Button>
                                 <IconButton
                                     onClick={() => toggleWishlist(product)}
                                     sx={{
-                                        border: '2px solid #E5E7EB',
-                                        borderRadius: '16px', p: 2,
+                                        border: '1.5px solid #E5E7EB',
+                                        borderRadius: '12px', p: 1.5,
                                         color: isInWishlist(product?.id) ? '#F43F5E' : 'inherit',
                                         borderColor: isInWishlist(product?.id) ? '#F43F5E' : '#E5E7EB'
                                     }}
