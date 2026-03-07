@@ -32,17 +32,19 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import EinvoiceTemplate from './Printtemplate';
 import { useNotification } from '../NotificationContext';
+import { useTheme } from '../ThemeContext';
 
 const AdminWrapper = styled(Box)`
   display: flex;
   min-height: 100vh;
-  background-color: #F9FAFB;
+  background-color: ${props => props.theme.colors.background};
+  color: ${props => props.theme.colors.text};
 `;
 
 const Sidebar = styled(Box)`
   width: 240px;
-  background: white;
-  border-right: 1px solid #E5E7EB;
+  background: ${props => props.theme.colors.surface};
+  border-right: 1px solid ${props => props.theme.colors.border};
   padding: 20px;
   position: sticky;
   top: 0;
@@ -52,21 +54,23 @@ const Sidebar = styled(Box)`
 const NavItem = styled(ListItem)`
   border-radius: 12px;
   margin-bottom: 4px;
-  color: ${props => props.active ? '#12B76A' : '#6B7280'};
-  background: ${props => props.active ? '#F0FDF4' : 'transparent'};
+  color: ${props => props.active ? props.theme.colors.primary : props.theme.colors.textSecondary};
+  background: ${props => props.active ? (props.theme.mode === 'dark' ? '#1E1E1E' : '#F0FDF4') : 'transparent'};
   cursor: pointer;
   transition: all 0.2s ease;
   
   &:hover {
-    background: #F9FAFB;
-    color: #12B76A;
+    background: ${props => props.theme.colors.surfaceSecondary};
+    color: ${props => props.theme.colors.primary};
   }
 `;
 
 const StatCard = styled(Paper)`
   padding: 20px;
   border-radius: 20px;
-  border: 1px solid #E5E7EB;
+  border: 1px solid ${props => props.theme.colors.border};
+  background-color: ${props => props.theme.colors.surface};
+  color: ${props => props.theme.colors.text};
   box-shadow: none;
   transition: transform 0.2s ease;
   &:hover {
@@ -80,12 +84,14 @@ const ModalBox = styled(Box)`
   left: 50%;
   transform: translate(-50%, -50%);
   width: 600px;
-  background-color: white;
+  background-color: ${props => props.theme.colors.surface};
+  color: ${props => props.theme.colors.text};
   border-radius: 24px;
   box-shadow: 24;
   padding: 32px;
   max-height: 90vh;
   overflow-y: auto;
+  border: 1px solid ${props => props.theme.colors.border};
 `;
 
 const ImageGrid = styled(Box)`
@@ -103,6 +109,7 @@ const SubHeader = styled(Box)`
 `;
 
 const Admin = () => {
+  const { theme } = useTheme();
   const showNotification = useNotification();
   const navigate = useNavigate();
   const userRole = localStorage.getItem('user_role');
@@ -456,18 +463,18 @@ const Admin = () => {
     <>
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {[
-          { label: 'Total Orders', val: stats?.total_orders || 0, icon: <ShoppingBag color="#12B76A" />, up: '12%', color: '#F0FDF4' },
-          { label: 'Live Traffic', val: '856', icon: <TrendingUp color="#3B82F6" />, up: '28%', color: '#EFF6FF' },
-          { label: 'Total Revenue', val: `$${stats?.total_revenue?.toLocaleString() || 0}`, icon: <DollarSign color="#8B5CF6" />, up: '5%', color: '#F5F3FF' },
-          { label: 'Total Products', val: stats?.total_products || 0, icon: <Activity color="#F59E0B" />, up: '0%', color: '#FFFBEB' },
+          { label: 'Total Orders', val: stats?.total_orders || 0, icon: <ShoppingBag color="#12B76A" />, up: '12%', color: theme.mode === 'dark' ? '#064E3B' : '#F0FDF4' },
+          { label: 'Live Traffic', val: '856', icon: <TrendingUp color="#3B82F6" />, up: '28%', color: theme.mode === 'dark' ? '#1E3A8A' : '#EFF6FF' },
+          { label: 'Total Revenue', val: `$${stats?.total_revenue?.toLocaleString() || 0}`, icon: <DollarSign color="#8B5CF6" />, up: '5%', color: theme.mode === 'dark' ? '#4C1D95' : '#F5F3FF' },
+          { label: 'Total Products', val: stats?.total_products || 0, icon: <Activity color="#F59E0B" />, up: '0%', color: theme.mode === 'dark' ? '#78350F' : '#FFFBEB' },
         ].map((stat, i) => (
           <Grid item xs={12} sm={6} md={3} key={i}>
             <StatCard>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                 <Box sx={{ p: 1.5, backgroundColor: stat.color, borderRadius: '12px' }}>{stat.icon}</Box>
-                <Typography variant="body2" sx={{ color: '#10B981', fontWeight: 700 }}>+{stat.up}</Typography>
+                <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 700 }}>+{stat.up}</Typography>
               </Box>
-              <Typography variant="caption" sx={{ color: '#6B7280', fontWeight: 600 }}>{stat.label}</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>{stat.label}</Typography>
               <Typography variant="h4" sx={{ fontWeight: 800 }}>{stat.val}</Typography>
             </StatCard>
           </Grid>
@@ -555,30 +562,30 @@ const Admin = () => {
   );
 
   const renderOrders = () => (
-    <TableContainer component={Paper} sx={{ borderRadius: '24px', border: '1px solid #E5E7EB', boxShadow: 'none' }}>
+    <TableContainer component={Paper} sx={{ borderRadius: '24px', border: '1px solid', borderColor: 'border', boxShadow: 'none', bgcolor: 'surface' }}>
       <Table>
-        <TableHead sx={{ bgcolor: '#F9FAFB' }}>
+        <TableHead sx={{ bgcolor: theme.mode === 'dark' ? '#1E1E1E' : '#F9FAFB' }}>
           <TableRow>
-            <TableCell sx={{ fontWeight: 700 }}>Order ID</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Customer</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Total</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Date</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Action</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Order ID</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Customer</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Total</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Date</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Status</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Action</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {orders.map((order) => (
             <TableRow key={order.id} hover sx={{ cursor: 'pointer' }} onClick={() => handleOrderClick(order.id)}>
-              <TableCell sx={{ fontWeight: 600 }}>#{order.id.slice(0, 8)}</TableCell>
+              <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>#{order.id.slice(0, 8)}</TableCell>
               <TableCell>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>{order.full_name}</Typography>
-                <Typography variant="caption" sx={{ color: '#6B7280' }}>{order.city}</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary' }}>{order.full_name}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>{order.city}</Typography>
               </TableCell>
-              <TableCell sx={{ fontWeight: 800 }}>${order.total_amount?.toFixed(2)}</TableCell>
-              <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
+              <TableCell sx={{ fontWeight: 800, color: 'text.primary' }}>${order.total_amount?.toFixed(2)}</TableCell>
+              <TableCell sx={{ color: 'text.primary' }}>{new Date(order.created_at).toLocaleDateString()}</TableCell>
               <TableCell>
-                <Chip label={order.status} size="small" sx={{ fontWeight: 700, bgcolor: order.status === 'Delivered' ? '#F0FDF4' : '#FFFBEB', color: order.status === 'Delivered' ? '#15803D' : '#B45309' }} />
+                <Chip label={order.status} size="small" sx={{ fontWeight: 700, bgcolor: order.status === 'Delivered' ? (theme.mode === 'dark' ? '#064E3B' : '#F0FDF4') : (theme.mode === 'dark' ? '#78350F' : '#FFFBEB'), color: order.status === 'Delivered' ? '#10B981' : '#F59E0B' }} />
               </TableCell>
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <IconButton size="small" color="primary"><Eye size={18} /></IconButton>
@@ -591,17 +598,17 @@ const Admin = () => {
   );
 
   const renderProducts = () => (
-    <TableContainer component={Paper} sx={{ borderRadius: '24px', border: '1px solid #E5E7EB', boxShadow: 'none' }}>
+    <TableContainer component={Paper} sx={{ borderRadius: '24px', border: '1px solid', borderColor: 'border', boxShadow: 'none', bgcolor: 'surface' }}>
       <Table>
-        <TableHead sx={{ bgcolor: '#F9FAFB' }}>
+        <TableHead sx={{ bgcolor: theme.mode === 'dark' ? '#1E1E1E' : '#F9FAFB' }}>
           <TableRow>
-            <TableCell sx={{ fontWeight: 700 }}>Image</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Category</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Price</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Stock</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Action</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Image</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Name</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Category</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Price</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Stock</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Status</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Action</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -609,18 +616,18 @@ const Admin = () => {
             <TableRow key={p.id} hover>
               <TableCell><Avatar variant="rounded" src={p.ProductImage} sx={{ width: 48, height: 48 }} /></TableCell>
               <TableCell>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>{p.ProductName}</Typography>
-                <Typography variant="caption" sx={{ color: '#6B7280' }}>ID: {p.id.slice(0, 8)}</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary' }}>{p.ProductName}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>ID: {p.id.slice(0, 8)}</Typography>
               </TableCell>
-              <TableCell>{p.category_details?.name || 'Uncategorized'}</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>${p.Rate}</TableCell>
-              <TableCell>{p.Qty} units</TableCell>
+              <TableCell sx={{ color: 'text.primary' }}>{p.category_details?.name || 'Uncategorized'}</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>${p.Rate}</TableCell>
+              <TableCell sx={{ color: 'text.primary' }}>{p.Qty} units</TableCell>
               <TableCell>
                 {p.is_trending && <Chip label="Trending" size="small" color="primary" sx={{ mr: 1, fontWeight: 700 }} />}
                 <Chip label={p.Qty > 0 ? 'In Stock' : 'Out'} size="small" color={p.Qty > 0 ? 'success' : 'error'} sx={{ fontWeight: 700 }} />
               </TableCell>
               <TableCell>
-                <IconButton size="small" onClick={() => handleEditClick(p)} sx={{ color: '#12B76A' }}><FileText size={18} /></IconButton>
+                <IconButton size="small" onClick={() => handleEditClick(p)} sx={{ color: 'success.main' }}><FileText size={18} /></IconButton>
                 <IconButton size="small" color="error" onClick={async () => {
                   if (window.confirm("Delete this product?")) {
                     try {
@@ -645,10 +652,10 @@ const Admin = () => {
     <Grid container spacing={3}>
       <Grid item xs={12} md={4}>
         <StatCard>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>{isCatEditing ? 'Edit Category' : 'Add Category'}</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: 'text.primary' }}>{isCatEditing ? 'Edit Category' : 'Add Category'}</Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <TextField fullWidth label="Category Name" value={catState.name} onChange={(e) => setCatState({ ...catState, name: e.target.value })} />
-            <Button component="label" variant="outlined" startIcon={<ImageIcon size={18} />} sx={{ borderRadius: '12px' }}>
+            <Button component="label" variant="outlined" startIcon={<ImageIcon size={18} />} sx={{ borderRadius: '12px', color: 'text.primary', borderColor: 'border' }}>
               {catState.image ? 'Change Image' : 'Upload Image'}
               <input type="file" hidden accept="image/*" onChange={(e) => setCatState({ ...catState, image: e.target.files[0], preview: URL.createObjectURL(e.target.files[0]) })} />
             </Button>
@@ -657,7 +664,7 @@ const Admin = () => {
                 <Avatar src={catState.preview} variant="rounded" sx={{ width: '100%', height: 120 }} />
                 <IconButton
                   size="small"
-                  sx={{ position: 'absolute', top: 5, right: 5, bgcolor: 'rgba(255,255,255,0.7)' }}
+                  sx={{ position: 'absolute', top: 5, right: 5, bgcolor: 'rgba(0,0,0,0.5)', color: 'white' }}
                   onClick={() => setCatState({ ...catState, image: null, preview: null })}
                 >
                   <X size={14} />
@@ -665,11 +672,11 @@ const Admin = () => {
               </Box>
             )}
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button variant="contained" fullWidth onClick={AddCategory} sx={{ bgcolor: '#12B76A', borderRadius: '12px' }}>
+              <Button variant="contained" fullWidth onClick={AddCategory} sx={{ bgcolor: 'secondary.main', borderRadius: '12px', color: 'white', '&:hover': { bgcolor: 'secondary.dark' } }}>
                 {isCatEditing ? 'Update' : 'Create'}
               </Button>
               {isCatEditing && (
-                <Button variant="outlined" fullWidth onClick={() => { setIsCatEditing(false); setEditingCatId(null); setCatState({ name: '', image: null, preview: null }); }} sx={{ borderRadius: '12px' }}>
+                <Button variant="outlined" fullWidth onClick={() => { setIsCatEditing(false); setEditingCatId(null); setCatState({ name: '', image: null, preview: null }); }} sx={{ borderRadius: '12px', color: 'text.primary', borderColor: 'border' }}>
                   Cancel
                 </Button>
               )}
@@ -678,22 +685,22 @@ const Admin = () => {
         </StatCard>
       </Grid>
       <Grid item xs={12} md={8}>
-        <TableContainer component={Paper} sx={{ borderRadius: '24px', border: '1px solid #E5E7EB', boxShadow: 'none' }}>
+        <TableContainer component={Paper} sx={{ borderRadius: '24px', border: '1px solid', borderColor: 'border', boxShadow: 'none', bgcolor: 'surface' }}>
           <Table>
-            <TableHead sx={{ bgcolor: '#F9FAFB' }}>
+            <TableHead sx={{ bgcolor: theme.mode === 'dark' ? '#1E1E1E' : '#F9FAFB' }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: 700 }}>Image</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Action</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Image</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Name</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {categories.map(c => (
                 <TableRow key={c.id}>
                   <TableCell><Avatar src={c.image} variant="rounded" /></TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>{c.name}</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>{c.name}</TableCell>
                   <TableCell>
-                    <IconButton size="small" sx={{ color: '#12B76A' }} onClick={() => handleCatEditClick(c)}><FileText size={18} /></IconButton>
+                    <IconButton size="small" sx={{ color: 'success.main' }} onClick={() => handleCatEditClick(c)}><FileText size={18} /></IconButton>
                     <IconButton size="small" color="error" onClick={async () => {
                       if (window.confirm("Delete this category?")) {
                         try {
@@ -725,10 +732,11 @@ const Admin = () => {
               sx={{
                 fontWeight: 700,
                 cursor: 'pointer',
-                backgroundColor: reportType === type ? '#12B76A' : 'transparent',
-                color: reportType === type ? 'white' : 'inherit',
-                border: '1.5px solid #12B76A',
-                '&:hover': { backgroundColor: reportType === type ? '#12B76A' : '#F0FDF4' }
+                backgroundColor: reportType === type ? theme.colors.secondary : 'transparent',
+                color: reportType === type ? 'white' : 'text.primary',
+                border: '1.5px solid',
+                borderColor: 'secondary.main',
+                '&:hover': { backgroundColor: reportType === type ? 'secondary.main' : 'surfaceSecondary' }
               }}
             />
           ))}
@@ -769,7 +777,15 @@ const Admin = () => {
                     <TableCell>{o.full_name}</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 800, color: '#12B76A' }}>${o.total_amount?.toFixed(2)}</TableCell>
                     <TableCell>
-                      <Chip label={o.status} size="small" sx={{ fontWeight: 700, bgcolor: '#F9FAFB' }} />
+                      <Chip
+                        label={o.status}
+                        size="small"
+                        sx={{
+                          fontWeight: 700,
+                          bgcolor: o.status === 'Delivered' ? (theme.mode === 'dark' ? '#064E3B' : '#F0FDF4') : (theme.mode === 'dark' ? '#78350F' : '#FFFBEB'),
+                          color: o.status === 'Delivered' ? '#10B981' : '#F59E0B'
+                        }}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -837,16 +853,16 @@ const Admin = () => {
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 4 }}>Status Breakdown</Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
                 {[
-                  { label: 'Delivered', val: 65, color: '#12B76A' },
-                  { label: 'Pending', val: 20, color: '#F59E0B' },
-                  { label: 'Processing', val: 15, color: '#3B82F6' },
+                  { label: 'Delivered', val: 65, color: theme.colors.success },
+                  { label: 'Pending', val: 20, color: theme.colors.warning },
+                  { label: 'Processing', val: 15, color: theme.colors.primary },
                 ].map(item => (
                   <Box key={item.label}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>{item.label}</Typography>
                       <Typography variant="body2" sx={{ color: '#6B7280' }}>{item.val}%</Typography>
                     </Box>
-                    <Box sx={{ height: 10, backgroundColor: '#F3F4F6', borderRadius: 5 }}>
+                    <Box sx={{ height: 10, backgroundColor: theme.colors.surfaceSecondary, borderRadius: 5 }}>
                       <Box sx={{ height: '100%', width: `${item.val}%`, backgroundColor: item.color, borderRadius: 5 }} />
                     </Box>
                   </Box>
@@ -860,15 +876,15 @@ const Admin = () => {
   );
 
   const renderEmployees = () => (
-    <TableContainer component={Paper} sx={{ borderRadius: '24px', border: '1px solid #E5E7EB', boxShadow: 'none' }}>
+    <TableContainer component={Paper} sx={{ borderRadius: '24px', border: '1px solid', borderColor: theme.colors.border, boxShadow: 'none', bgcolor: 'transparent' }}>
       <Table>
-        <TableHead sx={{ bgcolor: '#F9FAFB' }}>
+        <TableHead sx={{ bgcolor: theme.mode === 'dark' ? '#1E1E1E' : '#F9FAFB' }}>
           <TableRow>
-            <TableCell sx={{ fontWeight: 700 }}>Employee</TableCell>
-            <TableCell align="center" sx={{ fontWeight: 700 }}>View Stats</TableCell>
-            <TableCell align="center" sx={{ fontWeight: 700 }}>Manage Products</TableCell>
-            <TableCell align="center" sx={{ fontWeight: 700 }}>Manage Categories</TableCell>
-            <TableCell align="center" sx={{ fontWeight: 700 }}>Manage Orders</TableCell>
+            <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Employee</TableCell>
+            <TableCell align="center" sx={{ fontWeight: 700, color: 'text.primary' }}>View Stats</TableCell>
+            <TableCell align="center" sx={{ fontWeight: 700, color: 'text.primary' }}>Manage Products</TableCell>
+            <TableCell align="center" sx={{ fontWeight: 700, color: 'text.primary' }}>Manage Categories</TableCell>
+            <TableCell align="center" sx={{ fontWeight: 700, color: 'text.primary' }}>Manage Orders</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -876,7 +892,7 @@ const Admin = () => {
             <TableRow key={emp.id} hover>
               <TableCell>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Avatar sx={{ bgcolor: '#12B76A' }}>{emp.username[0].toUpperCase()}</Avatar>
+                  <Avatar sx={{ bgcolor: theme.colors.secondary }}>{emp.username[0].toUpperCase()}</Avatar>
                   <Box>
                     <Typography variant="body2" sx={{ fontWeight: 700 }}>{emp.username}</Typography>
                     <Typography variant="caption" color="text.secondary">{emp.email}</Typography>
@@ -962,7 +978,7 @@ const Admin = () => {
             <Typography color="text.secondary">Store management made simple.</Typography>
           </Box>
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ bgcolor: 'white', border: '1px solid #E5E7EB' }}>
+            <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ bgcolor: theme.colors.surface, border: '1px solid', borderColor: theme.colors.border, color: theme.colors.text }}>
               <Badge badgeContent={3} color="error"><Bell size={20} /></Badge>
             </IconButton>
             {userPermissions.can_manage_products && (
@@ -1120,12 +1136,12 @@ const Admin = () => {
                       </Box>
                     )}
                     {State.GalleryPreviews.map((url, i) => (
-                      <Box key={i} sx={{ width: 80, height: 80, borderRadius: '12px', overflow: 'hidden', border: '1px solid #E5E7EB', position: 'relative' }}>
+                      <Box key={i} sx={{ width: 80, height: 80, borderRadius: '12px', overflow: 'hidden', border: '1px solid', borderColor: 'border', position: 'relative' }}>
                         <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         <IconButton
                           size="small"
                           onClick={() => removeGalleryImage(i)}
-                          sx={{ position: 'absolute', top: 2, right: 2, p: 0.2, bgcolor: 'rgba(255,255,255,0.7)', '&:hover': { bgcolor: 'white' } }}
+                          sx={{ position: 'absolute', top: 2, right: 2, p: 0.2, bgcolor: 'rgba(0,0,0,0.5)', color: 'white', '&:hover': { bgcolor: 'black' } }}
                         >
                           <X size={14} />
                         </IconButton>
@@ -1135,14 +1151,22 @@ const Admin = () => {
                 </Box>
               )}
 
-              <Button variant="contained" fullWidth onClick={AddProduct} sx={{ bgcolor: '#111827', borderRadius: '16px', py: 2, fontSize: '16px', fontWeight: 700 }}>
+              <Button variant="contained" fullWidth onClick={AddProduct} sx={{ bgcolor: 'secondary.main', color: 'white', borderRadius: '16px', py: 2, fontSize: '16px', fontWeight: 700, '&:hover': { bgcolor: 'secondary.dark' } }}>
                 {isEditing ? 'Save Changes' : 'Create Product'}
               </Button>
             </Box>
           </ModalBox>
         </Modal>
 
-        <Popover open={Boolean(anchorEl)} anchorEl={anchorEl} onClose={() => setAnchorEl(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+        <Popover
+          open={Boolean(anchorEl)}
+          anchorEl={anchorEl}
+          onClose={() => setAnchorEl(null)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          PaperProps={{
+            sx: { bgcolor: 'surfaceSecondary', border: '1px solid', borderColor: 'border', borderRadius: '16px', backgroundImage: 'none', color: 'text.primary' }
+          }}
+        >
           <Box sx={{ p: 2, width: 300 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 2 }}>Notifications</Typography>
             {notifications.map(n => (

@@ -17,7 +17,8 @@ import { useWishlist } from '../WishlistContext';
 import { useNotification } from '../NotificationContext';
 
 const ImageContainer = styled(Box)`
-  background-color: #F9FAFB;
+  background-color: ${props => props.theme.colors.surface};
+  border: 1px solid ${props => props.theme.colors.border};
   border-radius: 32px;
   overflow: hidden;
   display: flex;
@@ -34,8 +35,8 @@ const ImageContainer = styled(Box)`
 `;
 
 const UrgencyBanner = styled(Box)`
-  background: #FEF2F2;
-  border: 1px solid #FEE2E2;
+  background: ${props => props.theme.mode === 'dark' ? '#450a0a' : '#FEF2F2'};
+  border: 1px solid ${props => props.theme.mode === 'dark' ? '#7f1d1d' : '#FEE2E2'};
   border-radius: 12px;
   padding: 12px 20px;
   display: flex;
@@ -46,12 +47,12 @@ const UrgencyBanner = styled(Box)`
 
 const FeatureItem = ({ icon, title, desc }) => (
     <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-        <Box sx={{ p: 1, backgroundColor: '#F0FDF4', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Box sx={{ p: 1, backgroundColor: 'surfaceSecondary', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid', borderColor: 'border' }}>
             {icon}
         </Box>
         <Box>
-            <Typography variant="body2" sx={{ fontWeight: 700 }}>{title}</Typography>
-            <Typography variant="caption" sx={{ color: '#6B7280' }}>{desc}</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary' }}>{title}</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>{desc}</Typography>
         </Box>
     </Box>
 );
@@ -132,7 +133,7 @@ const ProductDetails = () => {
     ];
 
     return (
-        <Box sx={{ backgroundColor: '#FFFFFF', minHeight: '100vh' }}>
+        <Box sx={{ backgroundColor: 'background.default', minHeight: '100vh', color: 'text.primary' }}>
             <Navigation />
 
             <Container maxWidth="xl" sx={{ py: 6 }}>
@@ -148,8 +149,9 @@ const ProductDetails = () => {
                                         <Box
                                             onClick={() => setSelectedImage(imgObj.image)}
                                             sx={{
-                                                p: 1, background: '#F9FAFB', borderRadius: '16px',
-                                                border: selectedImage === imgObj.image ? '2px solid #12B76A' : '2px solid transparent',
+                                                p: 1, background: 'surface', borderRadius: '16px',
+                                                border: selectedImage === imgObj.image ? '2px solid' : '2px solid transparent',
+                                                borderColor: selectedImage === imgObj.image ? 'primary.main' : 'transparent',
                                                 cursor: 'pointer', height: '80px', display: 'flex',
                                                 alignItems: 'center', justifyContent: 'center', overflow: 'hidden'
                                             }}
@@ -165,10 +167,10 @@ const ProductDetails = () => {
                     <Grid item xs={12} md={6}>
                         <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }}>
                             <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Chip label={product.category_details?.name || 'Flash Release'} size="small" variant="outlined" sx={{ fontWeight: 700, borderColor: '#12B76A', color: '#12B76A' }} />
+                                <Chip label={product.category_details?.name || 'Flash Release'} size="small" variant="outlined" sx={{ fontWeight: 700, borderColor: 'primary.main', color: 'primary.main' }} />
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                     <Rating value={4.8} precision={0.1} size="small" readOnly />
-                                    <Typography variant="caption" sx={{ color: '#6B7280', fontWeight: 600 }}>({product.reviews?.length || 0} Reviews)</Typography>
+                                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>({product.reviews?.length || 0} Reviews)</Typography>
                                 </Box>
                             </Box>
 
@@ -178,18 +180,18 @@ const ProductDetails = () => {
 
                             <UrgencyBanner>
                                 <Timer size={20} color="#F43F5E" />
-                                <Typography variant="body2" sx={{ color: '#991B1B', fontWeight: 600 }}>
+                                <Typography variant="body2" sx={{ color: 'error.main', fontWeight: 600 }}>
                                     Only <span style={{ fontWeight: 800 }}>{product.Qty}</span> items left in stock!
                                 </Typography>
                             </UrgencyBanner>
 
                             <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 2, mb: 3 }}>
-                                <Typography variant="h4" sx={{ fontWeight: 800, color: '#12B76A' }}>${parseFloat(product.Rate).toFixed(2)}</Typography>
-                                <Typography variant="h6" sx={{ color: '#9CA3AF', textDecoration: 'line-through' }}>${(parseFloat(product.Rate || 0) * 1.5).toFixed(2)}</Typography>
+                                <Typography variant="h4" sx={{ fontWeight: 800, color: 'primary.main' }}>${parseFloat(product.Rate).toFixed(2)}</Typography>
+                                <Typography variant="h6" sx={{ color: 'text.secondary', textDecoration: 'line-through' }}>${(parseFloat(product.Rate || 0) * 1.5).toFixed(2)}</Typography>
                                 {product.is_trending && <Chip label="TRENDING" color="error" size="small" sx={{ fontWeight: 900 }} />}
                             </Box>
 
-                            <Typography sx={{ color: '#4B5563', mb: 6, lineHeight: 1.7, fontSize: '16px' }}>
+                            <Typography sx={{ color: 'text.secondary', mb: 6, lineHeight: 1.7, fontSize: '16px' }}>
                                 {product.ProductDescription}
                             </Typography>
 
@@ -197,17 +199,17 @@ const ProductDetails = () => {
                                 <Button
                                     fullWidth variant="contained" startIcon={<ShoppingBag />}
                                     onClick={() => handleAddToCart(product)}
-                                    sx={{ bgcolor: '#111827', borderRadius: '12px', py: 1.5, fontWeight: 700, fontSize: '16px' }}
+                                    sx={{ bgcolor: 'text.primary', color: 'background.paper', borderRadius: '12px', py: 1.5, fontWeight: 700, fontSize: '16px', '&:hover': { bgcolor: 'primary.main', color: 'white' } }}
                                 >
                                     Add to Cart
                                 </Button>
                                 <IconButton
                                     onClick={() => toggleWishlist(product)}
                                     sx={{
-                                        border: '1.5px solid #E5E7EB',
+                                        border: '1.5px solid',
+                                        borderColor: isInWishlist(product?.id) ? 'error.main' : 'border',
                                         borderRadius: '12px', p: 1.5,
-                                        color: isInWishlist(product?.id) ? '#F43F5E' : 'inherit',
-                                        borderColor: isInWishlist(product?.id) ? '#F43F5E' : '#E5E7EB'
+                                        color: isInWishlist(product?.id) ? 'error.main' : 'text.primary',
                                     }}
                                 >
                                     <Heart size={24} fill={isInWishlist(product?.id) ? '#F43F5E' : 'transparent'} />
@@ -227,26 +229,26 @@ const ProductDetails = () => {
                     <Typography variant="h4" sx={{ fontWeight: 800, mb: 4 }}>Customer Reviews</Typography>
 
                     {product.can_review ? (
-                        <Paper sx={{ p: 4, borderRadius: '24px', mb: 6, bgcolor: '#F9FAFB', border: 'none' }}>
-                            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>Write a Review</Typography>
+                        <Paper sx={{ p: 4, borderRadius: '24px', mb: 6, bgcolor: 'surface', border: '1px solid', borderColor: 'border', boxShadow: 'none' }}>
+                            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: 'text.primary' }}>Write a Review</Typography>
                             <Rating value={revState.rating} onChange={(e, val) => setRevState({ ...revState, rating: val })} sx={{ mb: 2 }} />
                             <Box sx={{ display: 'flex', gap: 2 }}>
                                 <TextField
                                     fullWidth multiline rows={2} placeholder="Your experience matters..."
                                     value={revState.comment} onChange={(e) => setRevState({ ...revState, comment: e.target.value })}
-                                    sx={{ bgcolor: 'white', borderRadius: '12px' }}
+                                    sx={{ bgcolor: 'surfaceSecondary', borderRadius: '12px' }}
                                 />
                                 <Button
                                     variant="contained" onClick={handleAddReview} disabled={revState.loading}
-                                    sx={{ bgcolor: '#12B76A', borderRadius: '12px', minWidth: '120px' }}
+                                    sx={{ bgcolor: 'primary.main', borderRadius: '12px', minWidth: '120px', color: 'white' }}
                                 >
                                     {revState.loading ? <CircularProgress size={24} /> : <Send />}
                                 </Button>
                             </Box>
                         </Paper>
                     ) : (
-                        <Paper sx={{ p: 3, borderRadius: '20px', mb: 6, bgcolor: '#EFF6FF', border: '1px solid #DBEAFE' }}>
-                            <Typography variant="body2" sx={{ color: '#1E40AF', fontWeight: 600 }}>
+                        <Paper sx={{ p: 3, borderRadius: '20px', mb: 6, bgcolor: 'info.light', border: '1px solid', borderColor: 'info.main', opacity: 0.9 }}>
+                            <Typography variant="body2" sx={{ color: 'info.contrastText', fontWeight: 600 }}>
                                 🔒 Only verified buyers who have received this product can leave a review.
                             </Typography>
                         </Paper>
@@ -255,21 +257,21 @@ const ProductDetails = () => {
                     <Grid container spacing={4}>
                         {product.reviews?.map((rev, i) => (
                             <Grid item xs={12} md={6} key={i}>
-                                <Paper sx={{ p: 4, borderRadius: '24px', border: '1px solid #F3F4F6', boxShadow: 'none' }}>
+                                <Paper sx={{ p: 4, borderRadius: '24px', border: '1px solid', borderColor: 'border', boxShadow: 'none', bgcolor: 'surface' }}>
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                                         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                            <Avatar sx={{ bgcolor: '#12B76A' }}>{rev.user?.username[0].toUpperCase()}</Avatar>
+                                            <Avatar sx={{ bgcolor: 'primary.main', color: 'white' }}>{rev.user?.username[0].toUpperCase()}</Avatar>
                                             <Box>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{rev.user?.username}</Typography>
+                                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary' }}>{rev.user?.username}</Typography>
                                                     <Chip label="Verified Purchase" size="small" color="success" variant="outlined" sx={{ height: 20, fontSize: '10px', fontWeight: 800 }} />
                                                 </Box>
-                                                <Typography variant="caption" sx={{ color: '#9CA3AF' }}>{new Date(rev.created_at).toLocaleDateString()}</Typography>
+                                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>{new Date(rev.created_at).toLocaleDateString()}</Typography>
                                             </Box>
                                         </Box>
                                         <Rating value={rev.rating} size="small" readOnly />
                                     </Box>
-                                    <Typography sx={{ color: '#4B5563' }}>"{rev.comment}"</Typography>
+                                    <Typography sx={{ color: 'text.secondary' }}>"{rev.comment}"</Typography>
                                 </Paper>
                             </Grid>
                         ))}

@@ -10,17 +10,18 @@ import { useWishlist } from '../WishlistContext';
 import { useNotification } from '../NotificationContext'; // Assuming this context exists
 
 const StyledCard = styled(motion.div)`
-  background: white;
+  background: ${props => props.theme.colors.surface};
   border-radius: 24px;
-  border: 1px solid #F1F5F9;
+  border: 1px solid ${props => props.theme.colors.border};
   overflow: hidden;
   position: relative;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   height: 100%;
   cursor: pointer;
+  color: ${props => props.theme.colors.text};
 
   &:hover {
-    border-color: #0066FF;
+    border-color: ${props => props.theme.colors.primary};
     box-shadow: 0 20px 25px -5px rgba(0, 102, 255, 0.1);
     transform: translateY(-8px);
   }
@@ -29,7 +30,7 @@ const StyledCard = styled(motion.div)`
 const ImageWrapper = styled(Box)`
   position: relative;
   height: 240px;
-  background-color: #F8FAFC;
+  background-color: ${props => props.theme.colors.surfaceSecondary};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -52,7 +53,7 @@ const DiscountBadge = styled(Box)`
   position: absolute;
   top: 16px;
   left: 16px;
-  background: #EF4444;
+  background: ${props => props.theme.colors.error};
   color: white;
   padding: 4px 10px;
   border-radius: 8px;
@@ -65,13 +66,14 @@ const WishlistBtn = styled(IconButton)`
   position: absolute;
   top: 16px;
   right: 16px;
-  background: white;
+  background: ${props => props.theme.colors.surface};
+  color: ${props => props.theme.colors.textSecondary};
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   z-index: 2;
   
   &:hover {
-    background: #F8FAFC;
-    color: #EF4444;
+    background: ${props => props.theme.colors.surfaceSecondary};
+    color: ${props => props.theme.colors.error};
   }
 `;
 
@@ -81,14 +83,14 @@ const Content = styled(Box)`
 
 const ProgressBar = styled(Box)`
   height: 6px;
-  background: #F1F5F9;
+  background: ${props => props.theme.colors.border};
   border-radius: 100px;
   overflow: hidden;
   margin: 12px 0;
   
   div {
     height: 100%;
-    background: #10B981;
+    background: ${props => props.theme.colors.success};
     border-radius: 100px;
   }
 `;
@@ -130,25 +132,25 @@ const DashbordCard = ({ products = [] }) => {
             </ImageWrapper>
 
             <Content>
-              <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', mb: 0.5, display: 'block' }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', mb: 0.5, display: 'block' }}>
                 {product.category_details?.name || 'Accessories'}
               </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, fontSize: '16px', color: '#020617', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, fontSize: '16px', color: 'text.primary', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {product.ProductName}
               </Typography>
 
               <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mb: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 900, color: '#0066FF' }}>
+                <Typography variant="h6" sx={{ fontWeight: 900, color: 'primary.main' }}>
                   ${product.Rate || '299.00'}
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#94A3B8', textDecoration: 'line-through' }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', textDecoration: 'line-through' }}>
                   ${(parseFloat(product.Rate || 0) * 1.5).toFixed(2)}
                 </Typography>
               </Box>
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="caption" sx={{ fontWeight: 900, color: '#10B981' }}>60% CLAIMED</Typography>
-                <Typography variant="caption" sx={{ fontWeight: 900, color: '#EF4444' }}>ONLY 2 LEFT!</Typography>
+                <Typography variant="caption" sx={{ fontWeight: 900, color: 'success.main' }}>60% CLAIMED</Typography>
+                <Typography variant="caption" sx={{ fontWeight: 900, color: 'error.main' }}>ONLY 2 LEFT!</Typography>
               </Box>
               <ProgressBar><div style={{ width: '60%' }} /></ProgressBar>
 
@@ -159,8 +161,9 @@ const DashbordCard = ({ products = [] }) => {
                 startIcon={<ShoppingCart size={18} />}
                 sx={{
                   mt: 2,
-                  backgroundColor: '#111827',
-                  '&:hover': { backgroundColor: '#1F2937' },
+                  backgroundColor: 'text.primary',
+                  color: 'background.paper',
+                  '&:hover': { backgroundColor: 'primary.main', color: 'white' },
                   borderRadius: '10px',
                   textTransform: 'none',
                   fontWeight: 600,

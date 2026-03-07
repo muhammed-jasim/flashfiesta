@@ -13,23 +13,24 @@ const AuthContainer = styled(Box)`
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #F9FAFB;
+  background-color: ${props => props.theme.colors.background};
   padding: 24px;
 `;
 
 const StyledPaper = styled(motion.div)`
-  background: white;
+  background: ${props => props.theme.colors.surface};
   padding: 48px;
   border-radius: 24px;
   width: 100%;
   max-width: 450px;
-  border: 1px solid #E5E7EB;
+  border: 1px solid ${props => props.theme.colors.border};
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+  color: ${props => props.theme.colors.text};
 `;
 
 const SocialButton = styled(Button)`
-  border: 1px solid #E5E7EB !important;
-  color: #374151 !important;
+  border: 1px solid ${props => props.theme.colors.border} !important;
+  color: ${props => props.theme.colors.text} !important;
   text-transform: none !important;
   font-weight: 600 !important;
   border-radius: 12px !important;
@@ -37,8 +38,8 @@ const SocialButton = styled(Button)`
   flex: 1;
   
   &:hover {
-    background-color: #F9FAFB !important;
-    border-color: #D1D5DB !important;
+    background-color: ${props => props.theme.colors.surfaceSecondary} !important;
+    border-color: ${props => props.theme.colors.primary} !important;
   }
 `;
 
@@ -86,8 +87,8 @@ const Signin = () => {
         transition={{ duration: 0.5 }}
       >
         <Box sx={{ textAlign: 'center', mb: 4 }}>
-          <Typography variant="h4" sx={{ fontWeight: 800, mb: 1, color: '#111827' }}>Sign In</Typography>
-          <Typography sx={{ color: '#6B7280' }}>Enter your details to access your account</Typography>
+          <Typography variant="h4" sx={{ fontWeight: 800, mb: 1, color: 'text.primary' }}>Sign In</Typography>
+          <Typography sx={{ color: 'text.secondary' }}>Enter your details to access your account</Typography>
         </Box>
 
         <form onSubmit={handleSubmit}>
@@ -102,7 +103,7 @@ const Signin = () => {
               InputProps={{
                 startAdornment: <InputAdornment position="start"><User size={20} color="#9CA3AF" /></InputAdornment>,
               }}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: 'background.paper' } }}
             />
             <TextField
               fullWidth
@@ -115,11 +116,11 @@ const Signin = () => {
               InputProps={{
                 startAdornment: <InputAdornment position="start"><Lock size={20} color="#9CA3AF" /></InputAdornment>,
               }}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: 'background.paper' } }}
             />
 
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Typography sx={{ color: '#12B76A', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}>
+              <Typography sx={{ color: 'primary.main', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}>
                 Forgot Password?
               </Typography>
             </Box>
@@ -131,8 +132,8 @@ const Signin = () => {
               variant="contained"
               disabled={isLoading}
               sx={{
-                backgroundColor: '#12B76A',
-                '&:hover': { backgroundColor: '#0BA05B' },
+                backgroundColor: 'secondary.main',
+                '&:hover': { backgroundColor: 'secondary.dark' },
                 borderRadius: '12px',
                 py: 1.5,
                 textTransform: 'none',
@@ -148,7 +149,7 @@ const Signin = () => {
 
         <Box sx={{ my: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
           <Divider sx={{ flex: 1 }} />
-          <Typography sx={{ color: '#9CA3AF', fontSize: '12px', fontWeight: 600 }}>OR CONTINUE WITH</Typography>
+          <Typography sx={{ color: 'text.secondary', fontSize: '12px', fontWeight: 600 }}>OR CONTINUE WITH</Typography>
           <Divider sx={{ flex: 1 }} />
         </Box>
 
@@ -158,7 +159,7 @@ const Signin = () => {
         </Box>
 
         <Box sx={{ mt: 4, textAlign: 'center' }}>
-          <Typography sx={{ color: '#6B7280', fontSize: '14px' }}>
+          <Typography sx={{ color: 'text.secondary', fontSize: '14px' }}>
             Don't have an account?{" "}
             <Link to="/signup" style={{ color: '#12B76A', fontWeight: 700 }}>Sign Up</Link>
           </Typography>

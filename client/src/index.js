@@ -2,8 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { NotificationProvider } from './NotificationContext';
-import { ThemeProvider } from 'styled-components';
-import { theme } from './theme';
+import { ThemeProvider } from './ThemeContext';
 import { GlobalStyle } from './GlobalStyles';
 import { CartProvider } from './CartContext';
 import { WishlistProvider } from './WishlistContext';
@@ -15,7 +14,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   // <React.StrictMode>
   <Provider store={store}>
-    <ThemeProvider theme={theme}>
+    <ThemeProvider>
       <GlobalStyle />
       <NotificationProvider>
         <CartProvider>

@@ -20,6 +20,7 @@ export const GlobalStyle = createGlobalStyle`
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   button {
@@ -37,13 +38,13 @@ export const GlobalStyle = createGlobalStyle`
     width: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: ${props => props.theme.colors.surfaceSecondary};
   }
   ::-webkit-scrollbar-thumb {
-    background: #ccc;
+    background: ${props => props.theme.colors.border};
     border-radius: 10px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #999;
+    background: ${props => props.theme.colors.textSecondary};
   }
 `;

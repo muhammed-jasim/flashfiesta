@@ -12,7 +12,7 @@ const Wishlist = () => {
     const navigate = useNavigate();
 
     return (
-        <Box sx={{ backgroundColor: '#FFFFFF', minHeight: '100vh' }}>
+        <Box sx={{ backgroundColor: 'background.default', minHeight: '100vh', color: 'text.primary' }}>
             <Navigation />
 
             <Container maxWidth="xl" sx={{ py: 6 }}>
@@ -20,11 +20,11 @@ const Wishlist = () => {
                     <Button
                         startIcon={<ArrowLeft />}
                         onClick={() => navigate(-1)}
-                        sx={{ color: '#111827', fontWeight: 700 }}
+                        sx={{ color: 'text.primary', fontWeight: 700 }}
                     >
                         Back
                     </Button>
-                    <Typography variant="h4" sx={{ fontWeight: 900 }}>My <span style={{ color: '#F43F5E' }}>Wishlist</span></Typography>
+                    <Typography variant="h4" sx={{ fontWeight: 900 }}>My <span style={{ color: 'error.main' }}>Wishlist</span></Typography>
                 </Box>
 
                 {wishlist.length === 0 ? (
@@ -34,18 +34,18 @@ const Wishlist = () => {
                         animate={{ opacity: 1, y: 0 }}
                         sx={{
                             py: 6, textAlign: 'center', borderRadius: '24px',
-                            bgcolor: '#F9FAFB', border: '1px solid #F3F4F6', boxShadow: 'none'
+                            bgcolor: 'surface', border: '1px solid', borderColor: 'border', boxShadow: 'none', color: 'text.primary'
                         }}
                     >
-                        <Box sx={{ width: 80, height: 80, bgcolor: '#FFF1F2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 3 }}>
+                        <Box sx={{ width: 80, height: 80, bgcolor: 'error.light', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 3, opacity: 0.8 }}>
                             <Heart size={40} color="#F43F5E" />
                         </Box>
                         <Typography variant="h5" sx={{ fontWeight: 800, mb: 1 }}>Your wishlist is empty</Typography>
-                        <Typography sx={{ color: '#6B7280', mb: 4 }}>Save items you love to find them easily later.</Typography>
+                        <Typography sx={{ color: 'text.secondary', mb: 4 }}>Save items you love to find them easily later.</Typography>
                         <Button
                             variant="contained"
                             onClick={() => navigate('/dashboard')}
-                            sx={{ backgroundColor: '#111827', borderRadius: '12px', px: 4, py: 1.5, fontWeight: 700 }}
+                            sx={{ backgroundColor: 'text.primary', color: 'background.paper', borderRadius: '12px', px: 4, py: 1.5, fontWeight: 700, '&:hover': { bgcolor: 'primary.main', color: 'white' } }}
                         >
                             Explore Products
                         </Button>

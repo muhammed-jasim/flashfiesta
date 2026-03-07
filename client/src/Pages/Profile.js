@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const ProfileHero = styled(Box)`
-  background: linear-gradient(135deg, #12B76A 0%, #0BA05B 100%);
+  background: linear-gradient(135deg, ${props => props.theme.colors.primary} 0%, ${props => props.theme.colors.secondary} 100%);
   height: 160px;
   width: 100%;
   position: relative;
@@ -21,16 +21,19 @@ const AvatarWrapper = styled(Box)`
   position: absolute;
   bottom: -50px;
   left: 40px;
-  background: white;
+  background: ${props => props.theme.colors.surface};
   padding: 5px;
   border-radius: 50%;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  box-shadow: ${props => props.theme.shadows.lg};
+  border: 4px solid ${props => props.theme.colors.background};
 `;
 
 const ProfileCard = styled(Paper)`
   padding: 24px;
   border-radius: 20px;
-  border: 1px solid #E5E7EB;
+  border: 1px solid ${props => props.theme.colors.border};
+  background-color: ${props => props.theme.colors.surface};
+  color: ${props => props.theme.colors.text};
   box-shadow: none;
 `;
 
@@ -84,7 +87,7 @@ const Profile = () => {
     if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 20 }}><CircularProgress color="success" /></Box>;
 
     return (
-        <Box sx={{ bgcolor: '#F9FAFB', minHeight: '100vh' }}>
+        <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', color: 'text.primary' }}>
             <Navigation />
 
             <ProfileHero>
@@ -97,7 +100,7 @@ const Profile = () => {
                     </IconButton>
                     <AvatarWrapper>
                         <Avatar
-                            sx={{ width: 100, height: 100, bgcolor: '#12B76A', fontSize: '40px', fontWeight: 800 }}
+                            sx={{ width: 100, height: 100, bgcolor: 'primary.main', fontSize: '40px', fontWeight: 800, color: 'white' }}
                         >
                             {profile.username[0]?.toUpperCase()}
                         </Avatar>
@@ -114,13 +117,13 @@ const Profile = () => {
                         <Box sx={{ mb: 3 }}>
                             <Typography variant="h5" sx={{ fontWeight: 900, mb: 1 }}>{profile.username}</Typography>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Typography variant="body2" sx={{ color: '#6B7280', fontWeight: 600 }}>{profile.email}</Typography>
-                                <Divider orientation="vertical" flexItem sx={{ height: 12, my: 'auto' }} />
-                                <Typography variant="caption" sx={{ color: '#12B76A', fontWeight: 900, textTransform: 'uppercase' }}>{profile.role}</Typography>
+                                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>{profile.email}</Typography>
+                                <Divider orientation="vertical" flexItem sx={{ height: 12, my: 'auto', bgcolor: 'border' }} />
+                                <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 900, textTransform: 'uppercase' }}>{profile.role}</Typography>
                             </Box>
                         </Box>
 
-                        <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid #E5E7EB', boxShadow: 'none' }}>
+                        <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid', borderColor: 'border', bgcolor: 'surface', boxShadow: 'none' }}>
                             <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 2 }}>Quick Stats</Typography>
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -168,7 +171,7 @@ const Profile = () => {
 
                                 <Grid item xs={12}>
                                     <Divider sx={{ my: 2 }}>
-                                        <Typography variant="caption" sx={{ color: '#9CA3AF', fontWeight: 800 }}>SHIPPING DEFAULTS</Typography>
+                                        <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 800 }}>SHIPPING DEFAULTS</Typography>
                                     </Divider>
                                 </Grid>
 
@@ -202,7 +205,7 @@ const Profile = () => {
                                         variant="contained" fullWidth size="large"
                                         onClick={handleUpdate} disabled={saving}
                                         startIcon={saving ? <CircularProgress size={20} color="inherit" /> : <Save size={20} />}
-                                        sx={{ bgcolor: '#12B76A', '&:hover': { bgcolor: '#0BA05B' }, borderRadius: '12px', py: 1.5, fontWeight: 700 }}
+                                        sx={{ bgcolor: 'primary.main', color: 'white', '&:hover': { bgcolor: 'primary.dark' }, borderRadius: '12px', py: 1.5, fontWeight: 700 }}
                                     >
                                         {saving ? "Saving Changes..." : "Save Profile"}
                                     </Button>

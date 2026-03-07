@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTheme } from "../ThemeContext";
 import Navigation from "../Components/Navigation";
 import DashbordCard from "./DashbordCard";
 import { Box, Typography, Container, Grid, Button, Paper, CircularProgress, Chip, Divider, IconButton, InputBase } from "@mui/material";
@@ -12,11 +13,11 @@ import { ProductDeatailsApi, CategoriesApi } from "../Api";
 
 const HeroWrapper = styled(Box)`
   padding: 24px 0;
-  background-color: #FFFFFF;
+  background-color: ${props => props.theme.colors.surface};
 `;
 
 const HeroContainer = styled(Box)`
-  background: #020617;
+  background: ${props => props.theme.colors.dark};
   border-radius: 40px;
   padding: 60px;
   position: relative;
@@ -59,11 +60,12 @@ const TimerCircle = styled(Box)`
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: #0066FF;
+  background: ${props => props.theme.colors.primary};
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  color: white;
   
   span:first-child {
     font-size: 20px;
@@ -77,27 +79,28 @@ const TimerCircle = styled(Box)`
 `;
 
 const CategoryPill = styled(motion.div)`
-  background: white;
+  background: ${props => props.theme.colors.surface};
   padding: 12px 24px;
   border-radius: 100px;
-  border: 1px solid #E2E8F0;
+  border: 1px solid ${props => props.theme.colors.border};
   display: flex;
   align-items: center;
   gap: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
+  color: ${props => props.theme.colors.text};
 
   &:hover {
-    border-color: #0066FF;
-    color: #0066FF;
+    border-color: ${props => props.theme.colors.primary};
+    color: ${props => props.theme.colors.primary};
     box-shadow: 0 10px 15px -3px rgba(0, 102, 255, 0.1);
   }
 
-  ${({ active }) => active && `
-    background: #0066FF;
+  ${({ active, theme }) => active && `
+    background: ${theme.colors.primary};
     color: white;
-    border-color: #0066FF;
+    border-color: ${theme.colors.primary};
     &:hover { color: white; }
   `}
 `;
@@ -105,30 +108,34 @@ const CategoryPill = styled(motion.div)`
 const TrendingCard = styled(Paper)`
   padding: 12px;
   border-radius: 20px;
-  border: 1px solid #E2E8F0;
+  border: 1px solid ${props => props.theme.colors.border};
+  background-color: ${props => props.theme.colors.surface};
   display: flex;
   align-items: center;
   gap: 16px;
   box-shadow: none;
   cursor: pointer;
   transition: all 0.3s ease;
+  color: ${props => props.theme.colors.text};
 
   &:hover {
-    border-color: #0066FF;
+    border-color: ${props => props.theme.colors.primary};
     transform: translateY(-2px);
   }
 `;
 
 const NewsletterContainer = styled(Box)`
-  background: white;
+  background: ${props => props.theme.colors.surface};
   border-radius: 40px;
   padding: 60px;
   text-align: center;
-  border: 1px solid #E2E8F0;
+  border: 1px solid ${props => props.theme.colors.border};
   margin: 60px 0;
+  color: ${props => props.theme.colors.text};
 `;
 
 const Home = () => {
+  const { themeMode } = useTheme();
   const [products, setProducts] = useState([]);
   const [trendingProducts, setTrendingProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -186,7 +193,7 @@ const Home = () => {
   };
 
   return (
-    <Box sx={{ backgroundColor: '#FFFFFF', minHeight: '100vh' }}>
+    <Box sx={{ backgroundColor: 'background.default', minHeight: '100vh' }}>
       <Navigation />
 
       <HeroWrapper>
@@ -319,44 +326,44 @@ const Home = () => {
       </Container>
 
       {/* Footer */}
-      <Box sx={{ bgcolor: '#F8FAFC', py: 10, borderTop: '1px solid #E2E8F0' }}>
+      <Box sx={{ bgcolor: 'surfaceSecondary', py: 10, borderTop: '1px solid', borderColor: 'border' }}>
         <Container maxWidth="xl">
           <Grid container spacing={8}>
             <Grid item xs={12} md={4}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
                 <Zap size={24} fill="#0066FF" color="#0066FF" />
-                <Typography variant="h6" sx={{ fontWeight: 950 }}>FLASHFIESTA</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 950, color: 'text.primary' }}>FLASHFIESTA</Typography>
               </Box>
-              <Typography sx={{ color: '#64748B', maxWidth: '300px', mb: 4 }}>
+              <Typography sx={{ color: 'text.secondary', maxWidth: '300px', mb: 4 }}>
                 The ultimate destination for limited-time tech drops and high-performance flash sales. Optimized for the swift.
               </Typography>
             </Grid>
             <Grid item xs={6} md={2}>
-              <Typography sx={{ fontWeight: 900, mb: 3 }}>SHOPPING</Typography>
+              <Typography sx={{ fontWeight: 900, mb: 3, color: 'text.primary' }}>SHOPPING</Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Typography variant="body2" sx={{ color: '#64748B', cursor: 'pointer' }}>Live Drops</Typography>
-                <Typography variant="body2" sx={{ color: '#64748B', cursor: 'pointer' }}>Coming Soon</Typography>
-                <Typography variant="body2" sx={{ color: '#64748B', cursor: 'pointer' }}>Collections</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary', cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>Live Drops</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary', cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>Coming Soon</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary', cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>Collections</Typography>
               </Box>
             </Grid>
             <Grid item xs={6} md={2}>
-              <Typography sx={{ fontWeight: 900, mb: 3 }}>SUPPORT</Typography>
+              <Typography sx={{ fontWeight: 900, mb: 3, color: 'text.primary' }}>SUPPORT</Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Typography variant="body2" sx={{ color: '#64748B', cursor: 'pointer' }}>Order Status</Typography>
-                <Typography variant="body2" sx={{ color: '#64748B', cursor: 'pointer' }}>Returns</Typography>
-                <Typography variant="body2" sx={{ color: '#64748B', cursor: 'pointer' }}>Help Center</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary', cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>Order Status</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary', cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>Returns</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary', cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>Help Center</Typography>
               </Box>
             </Grid>
             <Grid item xs={6} md={2}>
-              <Typography sx={{ fontWeight: 900, mb: 3 }}>LEGAL</Typography>
+              <Typography sx={{ fontWeight: 900, mb: 3, color: 'text.primary' }}>LEGAL</Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Typography variant="body2" sx={{ color: '#64748B', cursor: 'pointer' }}>Privacy Policy</Typography>
-                <Typography variant="body2" sx={{ color: '#64748B', cursor: 'pointer' }}>Terms of Service</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary', cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>Privacy Policy</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary', cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>Terms of Service</Typography>
               </Box>
             </Grid>
           </Grid>
-          <Divider sx={{ my: 6 }} />
-          <Typography variant="caption" sx={{ color: '#94A3B8' }}>© 2026 FLASH FIESTA INC. ALL RIGHTS RESERVED.</Typography>
+          <Divider sx={{ my: 6, borderColor: 'border' }} />
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>© 2026 FLASH FIESTA INC. ALL RIGHTS RESERVED.</Typography>
         </Container>
       </Box>
     </Box >

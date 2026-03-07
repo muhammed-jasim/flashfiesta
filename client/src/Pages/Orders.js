@@ -7,6 +7,7 @@ import axios from "../axiosInstance";
 import { MyOrdersApi } from "../Api";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../ThemeContext";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import EinvoiceTemplate from './Printtemplate';
@@ -14,14 +15,16 @@ import EinvoiceTemplate from './Printtemplate';
 const OrderCard = styled(Paper)`
   padding: 20px;
   border-radius: 16px;
-  border: 1px solid #E5E7EB;
+  border: 1px solid ${props => props.theme.colors.border};
+  background-color: ${props => props.theme.colors.surface};
+  color: ${props => props.theme.colors.text};
   box-shadow: none;
   margin-bottom: 24px;
   transition: all 0.2s ease;
 
   &:hover {
-    border-color: #12B76A;
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+    border-color: ${props => props.theme.colors.primary};
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
   }
 `;
 
@@ -44,6 +47,9 @@ const ModalContent = styled(Paper)`
   border-radius: 24px;
   padding: 24px;
   outline: none;
+  background-color: ${props => props.theme.colors.surface};
+  color: ${props => props.theme.colors.text};
+  border: 1px solid ${props => props.theme.colors.border};
 `;
 
 
@@ -53,6 +59,7 @@ const Orders = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
+    const { themeMode } = useTheme();
     const navigate = useNavigate();
     const componentRef = useRef();
 
@@ -111,21 +118,22 @@ const Orders = () => {
     };
 
     const getStatusColor = (status) => {
+        const isDark = themeMode === 'dark';
         switch (status.toLowerCase()) {
-            case 'pending': return { bg: '#FFFBEB', color: '#B45309' };
-            case 'shipped': return { bg: '#EFF6FF', color: '#1D4ED8' };
-            case 'delivered': return { bg: '#F0FDF4', color: '#15803D' };
-            default: return { bg: '#F3F4F6', color: '#4B5563' };
+            case 'pending': return { bg: isDark ? '#78350F' : '#FFFBEB', color: isDark ? '#FBBF24' : '#B45309' };
+            case 'shipped': return { bg: isDark ? '#1E3A8A' : '#EFF6FF', color: isDark ? '#60A5FA' : '#1D4ED8' };
+            case 'delivered': return { bg: isDark ? '#064E3B' : '#F0FDF4', color: isDark ? '#34D399' : '#15803D' };
+            default: return { bg: isDark ? '#2A2A2A' : '#F3F4F6', color: isDark ? '#A0A0A0' : '#4B5563' };
         }
     };
 
     return (
-        <Box sx={{ backgroundColor: '#FFFFFF', minHeight: '100vh' }}>
+        <Box sx={{ backgroundColor: 'background.default', minHeight: '100vh', color: 'text.primary' }}>
             <Navigation />
             <Container maxWidth="lg" sx={{ py: 6 }}>
                 <Box sx={{ mb: 4 }}>
                     <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>My Orders</Typography>
-                    <Typography sx={{ color: '#6B7280' }}>Track and manage your limited flash purchases.</Typography>
+                    <Typography sx={{ color: 'text.secondary' }}>Track and manage your limited flash purchases.</Typography>
                 </Box>
 
                 {loading ? (
@@ -164,8 +172,8 @@ const Orders = () => {
                                 </Grid>
 
                                 <Grid item xs={12} md={2}>
-                                    <Typography variant="caption" sx={{ color: '#9CA3AF', fontWeight: 800, textTransform: 'uppercase' }}>Total</Typography>
-                                    <Typography variant="h6" sx={{ fontWeight: 800, color: '#111827' }}>${parseFloat(order.total_amount).toFixed(2)}</Typography>
+                                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 800, textTransform: 'uppercase' }}>Total</Typography>
+                                    <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary' }}>${parseFloat(order.total_amount).toFixed(2)}</Typography>
                                 </Grid>
 
                                 <Grid item xs={12} md={3} sx={{ display: 'flex', flexDirection: 'column', alignItems: { md: 'flex-end' }, gap: 2 }}>
@@ -180,7 +188,7 @@ const Orders = () => {
                                         variant="text"
                                         onClick={() => handleOpenDetails(order)}
                                         endIcon={<ChevronRight size={18} />}
-                                        sx={{ textTransform: 'none', fontWeight: 700, color: '#12B76A', '&:hover': { backgroundColor: '#F0FDF4' } }}
+                                        sx={{ textTransform: 'none', fontWeight: 700, color: 'primary.main', '&:hover': { backgroundColor: 'surfaceSecondary' } }}
                                     >
                                         Order Details
                                     </Button>
@@ -238,21 +246,21 @@ const Orders = () => {
                                 </Grid>
                             </Grid>
 
-                            <TableContainer component={Paper} sx={{ borderRadius: '16px', border: '1px solid #E5E7EB', boxShadow: 'none', mb: 4 }}>
+                            <TableContainer component={Paper} sx={{ borderRadius: '16px', border: '1px solid', borderColor: 'border', boxShadow: 'none', mb: 4, bgcolor: 'surface' }}>
                                 <Table>
-                                    <TableHead sx={{ bgcolor: '#F9FAFB' }}>
+                                    <TableHead sx={{ bgcolor: themeMode === 'dark' ? '#1E1E1E' : '#F9FAFB' }}>
                                         <TableRow>
-                                            <TableCell sx={{ fontWeight: 700 }}>Product</TableCell>
-                                            <TableCell align="center" sx={{ fontWeight: 700 }}>Qty</TableCell>
-                                            <TableCell align="right" sx={{ fontWeight: 700 }}>Price</TableCell>
+                                            <TableCell sx={{ fontWeight: 700, color: 'text.primary' }}>Product</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: 700, color: 'text.primary' }}>Qty</TableCell>
+                                            <TableCell align="right" sx={{ fontWeight: 700, color: 'text.primary' }}>Price</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
                                         {selectedOrder.items.map((item, idx) => (
                                             <TableRow key={idx}>
-                                                <TableCell sx={{ fontWeight: 600 }}>{item.product_name}</TableCell>
-                                                <TableCell align="center">{item.quantity}</TableCell>
-                                                <TableCell align="right">${parseFloat(item.price).toFixed(2)}</TableCell>
+                                                <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>{item.product_name}</TableCell>
+                                                <TableCell align="center" sx={{ color: 'text.primary' }}>{item.quantity}</TableCell>
+                                                <TableCell align="right" sx={{ color: 'text.primary' }}>${parseFloat(item.price).toFixed(2)}</TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
@@ -261,7 +269,7 @@ const Orders = () => {
 
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4 }}>
                                 <Typography variant="h5" sx={{ fontWeight: 800 }}>Total Paid</Typography>
-                                <Typography variant="h5" sx={{ fontWeight: 800, color: '#12B76A' }}>${parseFloat(selectedOrder.total_amount).toFixed(2)}</Typography>
+                                <Typography variant="h5" sx={{ fontWeight: 800, color: 'success.main' }}>${parseFloat(selectedOrder.total_amount).toFixed(2)}</Typography>
                             </Box>
 
                             <Divider sx={{ mb: 4 }} />
